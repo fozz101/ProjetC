@@ -1,0 +1,15 @@
+124535 france tunisie tunisair 16 12 2019 15:20 16:30 azer zeer 175 500 1 0
+114535 france tunisie nouvelair 16 12 2019 11:58 12:30 hj zeer 300 400 1 0
+12444 tunisie france airfrance 18 12 2019 18:20 19:30 carth zeer 175 600 1 0
+124465 tunisie france airfrance 18 12 2019 17:20 18:30 carth zeer 600 200 1 0
+4587755 france tunisie nouvelair 17 09 2020 16:59 19:07 hert yuj 700 1000 2 1
+4587785 france tunisie nouvelair 17 09 2020 16:59 19:07 hert yuj 700 1000 2 0
+78954 france tunisie airfrance 20 12 2019 18:20 19:30 zeer carthage 175 600 1 0
+4587855 tunisie france nouvelair 20 09 2020 16:59 19:07 hert yuj 700 1000 2 1
+4585855 tunisie france nouvelair 22 08 2022 09:25 22:22 hert yuj 700 1000 2 0
+789788 turquie tunis airfrance 12 08 2019 08:07 21:58 azerty reb 800 100 1 0
+785459 tunis turquie azerty 07 02 2022 12:59 01:00 rab ijj 700 500 1 0
+100000 korea tunis nouvelair 05 06 2020 14:58 16:00 aeroport_carthage aerop_korea 1750 500 1 0
+111111 tunis korea airfrance 13 06 2020 15:00 17:00 aerop_korea aeroport_carthage 2000 400 1 0
+122222 korea tunis tunisair 05 06 2020 18:00 20:00 qwert azert 1400 300 1 0
+133333 tunis korea airfrance 13 06 2020 20:00 22:00 ggg aaa 3000 600 1 0
