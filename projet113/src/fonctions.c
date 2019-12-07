@@ -365,6 +365,8 @@ return 0;
 int ajouter_Employe(user uti){
 user u[200];
 int i,n=getUsers(u);
+if((strlen(uti.nom)<4)||(strlen(uti.prenom)<4)||(strlen(uti.id)<4)||(strlen(uti.mail)<4)||(uti.cin<=0)||(strlen(uti.adresse)<4)||(strlen(uti.login)<4)||(strlen(uti.pass)<4)||(uti.phone<=0))
+return -1;
 for(i=0;i<n;i++){
 if(test(u[i].id,uti.id)==1)
 return 0;

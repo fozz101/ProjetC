@@ -102,8 +102,8 @@ main (int argc, char *argv[])
   gtk_widget_show (fgDialogPaiement);
   dialog3 = create_dialog3 ();
   gtk_widget_show (dialog3);*/
-  Catalogue = create_Catalogue ();
-  gtk_widget_show (Catalogue);/*
+  /*Catalogue = create_Catalogue ();
+  gtk_widget_show (Catalogue);
   mcRechercheVoitureClient = create_mcRechercheVoitureClient ();
   gtk_widget_show (mcRechercheVoitureClient);
   mcListeDesVoituresClient = create_mcListeDesVoituresClient ();

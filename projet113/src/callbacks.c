@@ -17,7 +17,7 @@
 void
 on_ajGestionCompteAdm_clicked          (GtkWidget       *objet,
                                         gpointer         user_data)
-{GtkWidget *window1,*window2,*output;
+{GtkWidget *window1,*window2,*output,*input1,*input2,*input3,*input4,*input5,*input6,*input7,*input8,*input9;
 FILE* f=fopen("modifUS.txt","r");
 user u[200];
 int i,n=getUsers(u);
@@ -26,14 +26,35 @@ fscanf(f,"%s\n",ch);
 for(i=0;i<n;i++)
 if((u[i].role==0)&&(test(u[i].login,ch)==1))
 break;
+fclose(f);
 window1 = lookup_widget(objet, "ajEspaceAd") ;
 window2 = lookup_widget(objet, "GestioncompteAdmin") ;
-gtk_widget_destroy(window1);
-window2=create_GestioncompteAdmin();
 
+
+window2=create_GestioncompteAdmin();
+input1 = lookup_widget(window2, "ajIDENAdm") ;
+input2 = lookup_widget(window2, "ajPrenomAdm") ;
+input3 = lookup_widget(window2, "ajNomAdm") ;
+input4 = lookup_widget(window2, "ajCinAdm") ;
+input5 = lookup_widget(window2, "ajMailAdm") ;
+input6 = lookup_widget(window2, "ajAdressAdm") ;
+input7 = lookup_widget(window2, "ajLoginAdm") ;
+input8 = lookup_widget(window2, "ajPassAdm") ;
+input9 = lookup_widget(window2, "ajPhoneAdm") ;
+gtk_entry_set_text(GTK_ENTRY(input1),u[i].id);
+gtk_entry_set_text(GTK_ENTRY(input2),u[i].prenom);
+gtk_entry_set_text(GTK_ENTRY(input3),u[i].nom);
+sprintf(ch,"%d\0",u[i].cin);
+gtk_entry_set_text(GTK_ENTRY(input4),ch);
+gtk_entry_set_text(GTK_ENTRY(input5),u[i].mail);
+gtk_entry_set_text(GTK_ENTRY(input6),u[i].adresse);
+gtk_entry_set_text(GTK_ENTRY(input7),u[i].login);
+gtk_entry_set_text(GTK_ENTRY(input8),u[i].pass);
+sprintf(ch,"%d\0",u[i].phone);
+gtk_entry_set_text(GTK_ENTRY(input9),ch);
 
 gtk_widget_show(window2);
-fclose(f);
+
 }
 
 
@@ -48,7 +69,7 @@ GtkWidget *window1,*window2,*treeview;
 
 window1 = lookup_widget(objet, "ajEspaceAd") ;
 window2 = lookup_widget(objet, "GestionEmp") ;
-gtk_widget_destroy(window1);
+
 window2=create_GestionEmp();
 gtk_widget_show(window2);
 treeview=lookup_widget(window2,"ajAffichageEmp");
@@ -97,7 +118,7 @@ fclose(f);
 void
 on_ajAjoutEmp_clicked                  (GtkWidget       *objet,
                                         gpointer         user_data)
-{char res[40],rol[20],ch[20],ch1[20];
+{char res[40],rol[20],ch[20],ch1[20],ch2[20];
 GtkWidget *input1,*input2,*input3,*input4,*input5,*input6,*input7,*input8,*input9,*input10,*output,*window1,*window2,*treeview,*output1;
 int c,p,r,v;
 
@@ -105,7 +126,7 @@ user us;
 input1 = lookup_widget(objet, "ajNomEmp") ;
 input2= lookup_widget(objet, "ajPrenomEmp") ;
 input3 = lookup_widget(objet, "ajIdEmp") ;
-
+input4=lookup_widget(objet, "ajRoleEmp123") ;
 input5= lookup_widget(objet, "ajCinEmp") ;
 input6= lookup_widget(objet, "ajMailEmp") ;
 input7= lookup_widget(objet, "ajAdressEmp") ;
@@ -114,9 +135,11 @@ input9= lookup_widget(objet, "ajPassEmp") ;
 input10= lookup_widget(objet, "ajPhoneEmp") ;
 output1= lookup_widget(objet, "ajAjoutEMPR") ;
 output= lookup_widget(objet, "ajErrAjoutEmp") ;
-
-
+strcpy(ch2,gtk_combo_box_get_active_text(GTK_COMBO_BOX(input4)));
+if(ch2[0]=='E')
 us.role=1;
+else
+us.role=0;
 
 strcpy(us.nom,gtk_entry_get_text(GTK_ENTRY(input1)));
 strcpy(us.prenom,gtk_entry_get_text(GTK_ENTRY(input2)));
@@ -130,7 +153,11 @@ strcpy(us.pass,gtk_entry_get_text(GTK_ENTRY(input9)));
 strcpy(ch1,gtk_entry_get_text(GTK_ENTRY(input10)));
 sscanf(ch1,"%d",&(us.phone));
 v=ajouter_Employe(us);
-if(v==0){
+
+if((v==-1)||(!strlen(ch2)))
+{strcpy(res,"veuillez verifier vos informations !");
+gtk_label_set_text(GTK_LABEL(output),res);}
+else if(v==0){
 strcpy(res,"Idenfiant déjà existant !");
 gtk_label_set_text(GTK_LABEL(output),res);}
 else if(v==2){
@@ -142,11 +169,12 @@ window1 = lookup_widget(objet, "Ajout_Employe") ;
 window2 = lookup_widget(objet, "GestionEmp") ;
 gtk_widget_destroy(window1);
 window2=create_GestionEmp();
+treeview=lookup_widget(window2,"ajAffichageEmp");
+Afficher_user(treeview,1);
 gtk_widget_show(window2);
 
 gtk_label_set_text(GTK_LABEL(output1),res);
-treeview=lookup_widget(window2,"ajAffichageEmp");
-Afficher_user(treeview,1);
+
 }
 
 
@@ -166,7 +194,7 @@ output1=lookup_widget(objet, "mmmm") ;
 win2=create_Ajout_Employe();
 gtk_widget_destroy(win1);
 gtk_widget_show(win2);
-gtk_label_set_text(GTK_LABEL(output1),"******");
+
 }
 
 
@@ -188,24 +216,48 @@ void
 on_ajModifEmploy_clicked               (GtkWidget      *objet,
                                         gpointer         user_data)
 {char id[30];
+user u[200];
+int n,i;
 FILE* f=fopen("modif.txt","w");
-GtkWidget *input,*output1,*win1,*win2;
+GtkWidget *input,*output1,*win1,*win2,*input1,*input2,*input3,*input4,*input5,*input6,*input7,*input8,*input9;
 input= lookup_widget(objet, "ajTSMEmp") ;
 output1= lookup_widget(objet, "ajErrTSMEMP") ;
-
+n=getUsers(u);
 strcpy(id,gtk_entry_get_text(GTK_ENTRY(input)));
-if(recherche(id,1)==-1)
+i=recherche(id,1);
+if(i==-1)
 gtk_label_set_text(GTK_LABEL(output1),"identifiant invalide!!");
 else{
 win1 = lookup_widget(objet, "GestionEmp") ;
 win2= lookup_widget(objet, "Modifier_Employe") ;
-
-
-
-win2=create_Modifier_Employe();
-
 gtk_widget_destroy(win1);
+win2=create_Modifier_Employe();
+input1=lookup_widget(win2, "ajIDAgentEmp1") ;
+input2=lookup_widget(win2, "ajNomEmp1") ;
+input3=lookup_widget(win2, "ajPrenomEmp1") ;
+input4=lookup_widget(win2, "ajCinEmp1") ;
+input5=lookup_widget(win2, "ajMailEmp1") ;
+input6=lookup_widget(win2, "ajAdressEmp1") ;
+input7=lookup_widget(win2, "ajLoginEmp1") ;
+input8=lookup_widget(win2, "ajPassEmp1") ;
+input9=lookup_widget(win2, "ajPhoneEmp1") ;
+gtk_entry_set_text(GTK_ENTRY(input1),u[i].id);
+gtk_entry_set_text(GTK_ENTRY(input2),u[i].nom);
+gtk_entry_set_text(GTK_ENTRY(input3),u[i].prenom);
+sprintf(id,"%d\0",u[i].cin);
+gtk_entry_set_text(GTK_ENTRY(input4),id);
+gtk_entry_set_text(GTK_ENTRY(input5),u[i].mail);
+gtk_entry_set_text(GTK_ENTRY(input6),u[i].adresse);
+gtk_entry_set_text(GTK_ENTRY(input7),u[i].login);
+gtk_entry_set_text(GTK_ENTRY(input8),u[i].pass);
+sprintf(id,"%d\0",u[i].phone);
+gtk_entry_set_text(GTK_ENTRY(input9),id);
+
+
+
+
 gtk_widget_show(win2);
+
 fprintf(f,"%s\n",id);
 fclose(f);
 }
@@ -218,18 +270,20 @@ on_ajModifEmp_clicked                  (GtkWidget       *objet,
 {user us,t[200];
 int n=getUsers( t);
 char ch1[20],ch[20],ch2[20];
-int j;
-GtkWidget *input1,*input2,*input3,*output,*output1,*input5,*input6,*input7,*input8 ,*input9,*input10,*input4,*output2,*win1,*win2,*treeview;
+int j,i,tt=1;
+GtkWidget *input,*input1,*input2,*input3,*output,*output1,*input5,*input6,*input7,*input8 ,*input9,*input10,*input4,*output2,*win1,*win2,*treeview;
 FILE* f=fopen("modif.txt","r");
+input = lookup_widget(objet, "ajIDAgentEmp1") ;
 input1 = lookup_widget(objet, "ajNomEmp1") ;
 input2= lookup_widget(objet, "ajPrenomEmp1") ;
 input3 = lookup_widget(objet, "ajRoleEmp1") ;
 input5= lookup_widget(objet, "ajCinEmp1") ;
 input6= lookup_widget(objet, "ajMailEmp1") ;
 input7= lookup_widget(objet, "ajAdressEmp1") ;
-
+input8=lookup_widget(objet, "ajLoginEmp1") ;
+input9=lookup_widget(objet, "ajPassEmp1") ;
 input10= lookup_widget(objet, "ajPhoneEmp1") ;
-fscanf(f,"%s\n",us.id);
+strcpy(us.id,gtk_entry_get_text(GTK_ENTRY(input)));
 output= lookup_widget(objet, "ajErrModifEmp") ;
 strcpy(ch2,gtk_combo_box_get_active_text(GTK_COMBO_BOX(input3)));
 if(ch2[0]=='A')
@@ -246,25 +300,44 @@ strcpy(ch,gtk_entry_get_text(GTK_ENTRY(input5)));
 sscanf(ch,"%d",&(us.cin));
 strcpy(us.adresse,gtk_entry_get_text(GTK_ENTRY(input7)));
 j=recherche(us.id,1);
-strcpy(us.login,t[j].login);
-strcpy(us.pass,t[j].pass);
+strcpy(us.login,gtk_entry_get_text(GTK_ENTRY(input8)));
+strcpy(us.pass,gtk_entry_get_text(GTK_ENTRY(input9)));
 strcpy(ch1,gtk_entry_get_text(GTK_ENTRY(input10)));
 sscanf(ch1,"%d",&(us.phone));
 if(us.role==2)
 us.classe=0;
 else
 us.classe=-1;
+for(i=0;i<n;i++)
+if((test(us.id,t[i].id)==0)&&(test(us.login,t[i].login)==1))
+{tt=0;
+break;}
+if(strlen(us.nom)==0)
+strcpy(us.nom,t[j].nom);
+if(strlen(us.prenom)==0)
+strcpy(us.prenom,t[j].prenom);
+if(strlen(us.mail)==0)
+strcpy(us.mail,t[j].mail);
+if((strlen(us.adresse)==0))
+strcpy(us.adresse,t[j].adresse);
+if((strlen(us.login)==0)||(!tt))
+strcpy(us.login,t[j].login);
+if(strlen(us.pass)==0)
+strcpy(us.pass,t[j].pass);
+if(us.phone==0)
+us.phone=t[j].phone;
+if(us.cin==0)
+us.cin=t[j].cin;
 modifUser(us);
 win1 = lookup_widget(objet, "GestionEmp") ;
 win2= lookup_widget(objet, "Modifier_Employe") ;
-
 win1=create_GestionEmp();
 treeview=lookup_widget(win1,"ajAffichageEmp");
 
 gtk_widget_destroy(win2);
 gtk_widget_show(win1);
 Afficher_user(treeview,1);
-output2= lookup_widget(objet, "ajErrTSMEMP") ;
+output2= lookup_widget(win1, "ajErrTSMEMP") ;
 gtk_label_set_text(GTK_LABEL(output2),"Modification réussite");
 fclose(f);
 }
@@ -331,15 +404,17 @@ gtk_widget_show(win);
 }
 
 
-int
+void
 on_ajModifInfoAdm_clicked              (GtkWidget       *objet,
                                         gpointer         user_data)
-{FILE* f=fopen("modifUS.txt","r");
-GtkWidget *input1,*win,*input2,*input3,*input4,*input5,*input6,*input7,*input8,*input9;
+{FILE *f;
+int tt=1;
+GtkWidget *input1,*win,*input2,*input3,*input4,*input5,*input6,*input7,*input8,*input9,*input;
+input= lookup_widget(objet, "ajIDENAdm") ;
 input1= lookup_widget(objet, "ajPrenomAdm") ;
 win= lookup_widget(objet, "ajMSGERRMAD") ;
 input2= lookup_widget(objet, "ajNomAdm") ;
-input3= lookup_widget(objet, "ajroleAD") ;
+//input3= lookup_widget(objet, "ajroleAD") ;
 input4= lookup_widget(objet, "ajCinAdm") ;
 input5= lookup_widget(objet, "ajMailAdm") ;
 input6= lookup_widget(objet, "ajAdressAdm") ;
@@ -349,11 +424,12 @@ input9= lookup_widget(objet, "ajPhoneAdm") ;
 user us,u[200];
 int i,j,n=getUsers(u);
 char ch[20],st[70];
-fscanf(f,"%s\n",ch);
-fclose(f);
+
+strcpy(us.id,gtk_entry_get_text(GTK_ENTRY(input)));
 for(i=0;i<n;i++)
-if((u[i].role==0)&&(test(u[i].login,ch)==1))
+if((u[i].role==0)&&(test(u[i].id,us.id)==1))
 break;
+
 strcpy(us.prenom,gtk_entry_get_text(GTK_ENTRY(input1)));
 strcpy(us.nom,gtk_entry_get_text(GTK_ENTRY(input2)));
 strcpy(st,gtk_entry_get_text(GTK_ENTRY(input4)));
@@ -364,30 +440,39 @@ strcpy(us.login,gtk_entry_get_text(GTK_ENTRY(input7)));
 strcpy(us.pass,gtk_entry_get_text(GTK_ENTRY(input8)));
 strcpy(ch,gtk_entry_get_text(GTK_ENTRY(input9)));
 sscanf(ch,"%d",&us.phone);
-strcpy(st,gtk_combo_box_get_active_text(GTK_COMBO_BOX(input3)));
+//strcpy(st,gtk_combo_box_get_active_text(GTK_COMBO_BOX(input3)));
 for(j=0;j<n;j++)
-if((test(u[j].login,us.login)==1))
+{if((test(u[j].login,us.login)==1)&&(test(us.id,u[j].id)==0))
 {gtk_label_set_text(GTK_LABEL(win),"login déjà existant!");
-return 0;
-}
-else{
+tt=0;
+break;
+}}
+if(tt){
+
+us.role=0;
+us.classe=-1;
+if(strlen(us.nom)==0)
+strcpy(us.nom,u[i].nom);
+if(strlen(us.prenom)==0)
+strcpy(us.prenom,u[i].prenom);
+if(strlen(us.mail)==0)
+strcpy(us.mail,u[i].mail);
+if((strlen(us.adresse)==0))
+strcpy(us.adresse,u[i].adresse);
+if((strlen(us.login)==0)||(!tt))
+strcpy(us.login,u[i].login);
+if(strlen(us.pass)==0)
+strcpy(us.pass,u[i].pass);
+if(us.phone==0)
+us.phone=u[i].phone;
+if(us.cin==0)
+us.cin=u[i].cin;
+
+u[i]=us;
+
 f=fopen("modifUS.txt","w");
 fprintf(f,us.login);
 fclose(f);
-if(st[0]=='C')
-{
-us.classe=0;
-us.role=2;
-}
-else if(st[0]=='E'){
-us.role=1;
-us.classe=-1;}
-else
-{us.role=0;
-us.classe=-1;
-}
-strcpy(us.id,u[i].id);
-u[i]=us;
 updateUsers(u,n);
 gtk_label_set_text(GTK_LABEL(win),"modification réussite");
 }
@@ -503,7 +588,7 @@ GtkWidget *window1,*window2,*treeview;
 
 window1 = lookup_widget(objet, "ajEspaceAd") ;
 window2 = lookup_widget(objet, "GestionClients") ;
-gtk_widget_destroy(window1);
+
 window2=create_GestionClients();
 gtk_widget_show(window2);
 treeview=lookup_widget(window2,"ajAffichage");
@@ -570,8 +655,14 @@ else if(ch1[0]=='S')
 us.classe=1;
 else if(ch1[0]=='G')
 us.classe=2;
+else
+us.classe=0;
 v=ajouter_Employe(us);
-if(v==0){
+if(v==-1)
+{strcpy(res,"veuillez verifier vos informations !");
+gtk_label_set_text(GTK_LABEL(output),res);
+}
+else if(v==0){
 strcpy(res,"Idenfiant déjà existant !");
 gtk_label_set_text(GTK_LABEL(output),res);}
 else if(v==2){
@@ -593,24 +684,43 @@ Afficher_user(treeview,2);
 void
 on_ajModifierCli_clicked               (GtkWidget       *objet,
                                         gpointer         user_data)
-{char id[30];
+{char id[30],ch[20];
+user u[200];
+int i,n;
+n=getUsers(u);
 FILE* f=fopen("modif.txt","w");
-GtkWidget *input,*output1,*win1,*win2;
+GtkWidget *input,*output1,*win1,*win2,*input1,*input2,*input3,*input4,*input5,*input6,*input7;
 input= lookup_widget(objet, "ajChoixIDClient") ;
 output1= lookup_widget(objet, "ajBModifSuppCli") ;
 
 strcpy(id,gtk_entry_get_text(GTK_ENTRY(input)));
-if(recherche(id,2)==-1)
+i=recherche(id,2);
+if(i==-1)
 gtk_label_set_text(GTK_LABEL(output1),"identifiant invalide!!");
 else{
 win1 = lookup_widget(objet, "GestionClients") ;
 win2= lookup_widget(objet, "Modifier_Client") ;
 
-
+gtk_widget_destroy(win1);
 
 win2=create_Modifier_Client();
+input1= lookup_widget(win2, "ajIdentiCli") ;
+input2= lookup_widget(win2, "ajNomCli") ;
+input3= lookup_widget(win2, "ajPrenomCli") ;
+input4= lookup_widget(win2, "ajCinCli") ;
+input5= lookup_widget(win2, "ajMailCli") ;
+input6= lookup_widget(win2, "ajAdressCli") ;
+input7= lookup_widget(win2, "ajPhoneCli") ;
+gtk_entry_set_text(GTK_ENTRY(input1),u[i].id);
+gtk_entry_set_text(GTK_ENTRY(input2),u[i].nom);
+gtk_entry_set_text(GTK_ENTRY(input3),u[i].prenom);
+sprintf(ch,"%d\0",u[i].cin);
+gtk_entry_set_text(GTK_ENTRY(input4),ch);
+gtk_entry_set_text(GTK_ENTRY(input5),u[i].mail);
+gtk_entry_set_text(GTK_ENTRY(input6),u[i].adresse);
+sprintf(ch,"%d\0",u[i].phone);
+gtk_entry_set_text(GTK_ENTRY(input7),ch);
 
-gtk_widget_destroy(win1);
 gtk_widget_show(win2);
 fprintf(f,"%s\n",id);
 fclose(f);
@@ -626,7 +736,7 @@ user us,t[200];
 int n=getUsers( t);
 char ch1[20],ch[20],ch2[20];
 int j;
-GtkWidget *input1,*input2,*input3,*output,*output1,*input5,*input6,*input7,*input8 ,*input9,*input10,*input4,*output2,*win1,*win2,*treeview;
+GtkWidget *getid,*input1,*input2,*input3,*output,*output1,*input5,*input6,*input7,*input8 ,*input9,*input10,*input4,*output2,*win1,*win2,*treeview;
 FILE* f=fopen("modif.txt","r");
 input1 = lookup_widget(objet, "ajNomCli") ;
 input2= lookup_widget(objet, "ajPrenomCli") ;
@@ -634,9 +744,9 @@ input3 = lookup_widget(objet, "AjClassCli") ;
 input5= lookup_widget(objet, "ajCinCli") ;
 input6= lookup_widget(objet, "ajMailCli") ;
 input7= lookup_widget(objet, "ajAdressCli") ;
-
+getid=lookup_widget(objet, "ajIdentiCli") ;
 input10= lookup_widget(objet, "ajPhoneCli") ;
-fscanf(f,"%s\n",us.id);
+strcpy(us.id,gtk_entry_get_text(GTK_ENTRY(getid)));
 strcpy(ch2,gtk_combo_box_get_active_text(GTK_COMBO_BOX(input3)));
 if(ch2[0]=='B')
 us.classe=0;
@@ -657,6 +767,22 @@ strcpy(us.pass,t[j].pass);
 strcpy(ch1,gtk_entry_get_text(GTK_ENTRY(input10)));
 sscanf(ch1,"%d",&(us.phone));
 us.role=2;
+if(strlen(us.nom)==0)
+strcpy(us.nom,t[j].nom);
+if(strlen(us.prenom)==0)
+strcpy(us.prenom,t[j].prenom);
+if(strlen(us.mail)==0)
+strcpy(us.mail,t[j].mail);
+if((strlen(us.adresse)==0))
+strcpy(us.adresse,t[j].adresse);
+if((strlen(us.login)==0))
+strcpy(us.login,t[j].login);
+if(strlen(us.pass)==0)
+strcpy(us.pass,t[j].pass);
+if(us.phone==0)
+us.phone=t[j].phone;
+if(us.cin==0)
+us.cin=t[j].cin;
 modifUser(us);
 win1 = lookup_widget(objet, "GestionClients") ;
 win2= lookup_widget(objet, "Modifier_Client") ;
@@ -810,9 +936,10 @@ win1= lookup_widget(objet, "Ajout_Employe") ;
 win2= lookup_widget(objet, "GestionEmp") ;
 gtk_widget_destroy(win1);
 win2=create_GestionEmp();
-gtk_widget_show(win2);
-treeview=lookup_widget(win1,"ajAffichageEmp");
+treeview=lookup_widget(win2, "ajAffichageEmp") ;
+
 Afficher_user(treeview,1);
+gtk_widget_show(win2);
 }
 
 
@@ -1667,4 +1794,86 @@ gtk_widget_destroy(window1);
 window2=create_ajEspaceAd();
 gtk_widget_show(window2);
 }
+
+
+void
+on_ajRechEmployyy_clicked              (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget *input,*treeview,*output,*win;
+int p;
+char id[20];
+
+win=lookup_widget(objet,"GestionEmp");
+input=lookup_widget(objet,"ajTSMEmp");
+
+output=lookup_widget(objet,"ajErrTSMEMP");
+strcpy(id,gtk_entry_get_text(GTK_ENTRY(input)));
+p=recherche( id,1);
+if(p!=-1){
+
+
+gtk_widget_destroy(win);
+
+win=create_GestionEmp();
+treeview=lookup_widget(win,"ajAffichageEmp");
+gtk_widget_show(win);
+
+affichAZ(treeview,p);
+}
+else
+{
+gtk_widget_destroy(win);
+win=create_GestionEmp();
+output=lookup_widget(win,"ajErrTSMEMP");
+treeview=lookup_widget(win,"ajAffichageEmp");
+gtk_widget_show(win);
+gtk_label_get_text(GTK_LABEL(output));
+gtk_label_set_text(GTK_LABEL(output),"Identifiant invalide");
+Afficher_user(treeview,1);
+}
+}
+
+
+void
+on_ajannulationajcli_clicked           (GtkWidget       *objet,
+                                        gpointer         user_data)
+{GtkWidget* win,*win2,*win1,*treeview;
+win=lookup_widget(objet,"GestionClients");
+win1=lookup_widget(objet,"Ajout_client");
+win2=lookup_widget(objet,"Modifier_Client");
+gtk_widget_destroy(win1);
+gtk_widget_destroy(win2);
+win=create_GestionClients();
+treeview=lookup_widget(win,"ajAffichage");
+Afficher_user(treeview,2);
+gtk_widget_show(win);
+}
+
+
+void
+on_ajAnnulermodifAge_clicked           (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget* win,*win1,*win2,*treeview;
+win=lookup_widget(objet,"Modifier_Employe");
+win1=lookup_widget(objet,"GestionEmp");
+
+gtk_widget_destroy(win);
+
+win1=create_GestionEmp();
+treeview=lookup_widget(win1,"ajAffichageEmp");
+gtk_widget_destroy(win);
+Afficher_user(treeview,1);
+gtk_widget_show(win1);
+}
+
+
+
+
+
+
+
+
+
 

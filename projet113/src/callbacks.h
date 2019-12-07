@@ -48,7 +48,7 @@ void
 on_ajaffaff_clicked                    (GtkWidget       *button,
                                         gpointer         user_data);
 
-int
+void
 on_ajModifInfoAdm_clicked              (GtkWidget       *button,
                                         gpointer         user_data);
 
@@ -276,3 +276,19 @@ void
 on_BoutonPredecentGestionDeServices_clicked
                                         (GtkWidget       *objet,
                                         gpointer         user_data);
+
+void
+on_ajRechEmployyy_clicked              (GtkWidget       *button,
+                                        gpointer         user_data);
+
+void
+on_ajannulationajcli_clicked           (GtkWidget       *button,
+                                        gpointer         user_data);
+
+void
+on_ajAnnulermodifAge_clicked           (GtkWidget       *button,
+                                        gpointer         user_data);
+
+
+
+
