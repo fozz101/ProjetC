@@ -1,75 +1,40 @@
 #include <gtk/gtk.h>
 
-
-void
-on_button3_clicked                     (GtkWidget       *objet,
+void on_button_liste_hotel(GtkWidget       *objet,
                                         gpointer         user_data);
-
-void
-on_button1_clicked                     (GtkWidget       *objet,
+void on_mod_sup_reservation(GtkWidget       *objet,
                                         gpointer         user_data);
-
-void
-on_button2_clicked                     (GtkWidget       *objet,
+void on_ajout_reservation(GtkWidget       *objet,
                                         gpointer         user_data);
-
-void
-on_button4_clicked                     (GtkWidget       *objet,
+void on_mod_sup_offre(GtkWidget       *objet,
                                         gpointer         user_data);
-
-void
-on_button5_clicked                     (GtkWidget       *objet,
+void on_ajout_offre(GtkWidget       *objet,
                                         gpointer         user_data);
-
-void
-on_button6_clicked                     (GtkWidget       *objet,
+void on_retour_resultat(GtkWidget       *objet,
                                         gpointer         user_data);
-
-void
-on_button9_clicked                     (GtkWidget       *objet,
+void on_button_modifier_reservation(GtkWidget       *objet,
                                         gpointer         user_data);
-
-void
-on_button8_clicked                     (GtkWidget       *objet,
+void on_button_supprimer_reservation(GtkWidget       *objet,
                                         gpointer         user_data);
-
-void
-on_button7_clicked                     (GtkWidget       *objet,
+void on_reserver_hebergement(GtkWidget       *objet,
                                         gpointer         user_data);
-
-void
-on_button10_clicked                    (GtkWidget       *objet,
+void on_supprimer_hebergement(GtkWidget       *objet,
                                         gpointer         user_data);
-
-void
-on_button11_clicked                    (GtkWidget       *objet,
+void on_modifier_hebergement(GtkWidget       *objet,
+                                        gpointer         user_data);
+void on_rechercher_hebergement(GtkWidget       *objet,
+                                        gpointer         user_data);
+void on_ajouter_hebergement(GtkWidget       *objet,
+                                        gpointer         user_data);
+void on_retour_ajout_hebergement(GtkWidget       *objet,
                                         gpointer         user_data);
 
 
-void
-on_button12_clicked                    (GtkWidget       *objet,
-                                        gpointer         user_data);
 
-void
-on_clien_clicked                       (GtkButton       *button,
-                                        gpointer         user_data);
 
-void
-on_button15_clicked                    (GtkButton       *button,
-                                        gpointer         user_data);
 
-void
-on_button17_clicked                    (GtkButton       *button,
-                                        gpointer         user_data);
 
-void
-on_button13_clicked                    (GtkButton       *button,
-                                        gpointer         user_data);
 
-void
-on_button19_clicked                    (GtkButton       *button,
-                                        gpointer         user_data);
 
-void
-on_button20_clicked                    (GtkButton       *button,
-                                        gpointer         user_data);
+
+
