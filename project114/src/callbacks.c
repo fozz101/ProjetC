@@ -1,0 +1,2635 @@
+#ifdef HAVE_CONFIG_H
+#  include <config.h>
+#endif
+#include"Vol.h"
+#include <gtk/gtk.h>
+#include<gtk/gtkclist.h>
+#include <gdk/gdkkeysyms.h>
+#include "marouane.h"
+#include "callbacks.h"
+#include "interface.h"
+#include "support.h"
+#include "fonctions.h"
+#include <string.h>
+#include <stdio.h>
+#include "facture.h"
+#include <stdlib.h>
+#include "reclamation.h"
+
+gchar *str_data1,*str_data12,*str_data13,*str_data14,*str_data15,*str_data16,*str_data17,*str_data18;
+
+void
+on_ajGestionCompteAdm_clicked          (GtkWidget       *objet,
+                                        gpointer         user_data)
+{GtkWidget *window1,*window2,*output,*input1,*input2,*input3,*input4,*input5,*input6,*input7,*input8,*input9;
+FILE* f=fopen("modifUS.txt","r");
+user u[200];
+int i,n=getUsers(u);
+char ch[20],st[70];
+fscanf(f,"%s\n",ch);
+for(i=0;i<n;i++)
+if((u[i].role==0)&&(test(u[i].login,ch)==1))
+break;
+fclose(f);
+window1 = lookup_widget(objet, "ajEspaceAd") ;
+window2 = lookup_widget(objet, "GestioncompteAdmin") ;
+
+
+window2=create_GestioncompteAdmin();
+input1 = lookup_widget(window2, "ajIDENAdm") ;
+input2 = lookup_widget(window2, "ajPrenomAdm") ;
+input3 = lookup_widget(window2, "ajNomAdm") ;
+input4 = lookup_widget(window2, "ajCinAdm") ;
+input5 = lookup_widget(window2, "ajMailAdm") ;
+input6 = lookup_widget(window2, "ajAdressAdm") ;
+input7 = lookup_widget(window2, "ajLoginAdm") ;
+input8 = lookup_widget(window2, "ajPassAdm") ;
+input9 = lookup_widget(window2, "ajPhoneAdm") ;
+gtk_entry_set_text(GTK_ENTRY(input1),u[i].id);
+gtk_entry_set_text(GTK_ENTRY(input2),u[i].prenom);
+gtk_entry_set_text(GTK_ENTRY(input3),u[i].nom);
+sprintf(ch,"%d\0",u[i].cin);
+gtk_entry_set_text(GTK_ENTRY(input4),ch);
+gtk_entry_set_text(GTK_ENTRY(input5),u[i].mail);
+gtk_entry_set_text(GTK_ENTRY(input6),u[i].adresse);
+gtk_entry_set_text(GTK_ENTRY(input7),u[i].login);
+gtk_entry_set_text(GTK_ENTRY(input8),u[i].pass);
+sprintf(ch,"%d\0",u[i].phone);
+gtk_entry_set_text(GTK_ENTRY(input9),ch);
+
+gtk_widget_show(window2);
+
+}
+
+
+
+
+
+void
+on_ajGestionEmp_clicked                (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget *window1,*window2,*treeview;
+
+window1 = lookup_widget(objet, "ajEspaceAd") ;
+window2 = lookup_widget(objet, "GestionEmp") ;
+
+window2=create_GestionEmp();
+gtk_widget_show(window2);
+treeview=lookup_widget(window2,"ajAffichageEmp");
+Afficher_user(treeview,1);
+}
+
+
+void
+on_ajConnect_clicked                   (GtkWidget       *objet_graphique,
+                                        gpointer         user_data)
+{GtkWidget *login,*pw,*output,*win1,*window2,*win3,*win4;
+char log[20],pass[20],res[40];
+FILE* f =fopen("modifUS.txt","w");
+FILE* g =fopen("etat.txt","w");
+login = lookup_widget(objet_graphique, "ajLogin") ;
+pw = lookup_widget(objet_graphique, "ajPass") ;
+output = lookup_widget(objet_graphique, "ajErrAuth") ;
+win1 = lookup_widget(objet_graphique, "auth") ;
+window2 = lookup_widget(objet_graphique, "ajEspaceAd") ;
+win3 = lookup_widget(objet_graphique, "Espace_Emp") ;
+win4 = lookup_widget(objet_graphique, "EspaceCli") ;
+strcpy(log,gtk_entry_get_text(GTK_ENTRY(login)));
+strcpy(pass,gtk_entry_get_text(GTK_ENTRY(pw)));
+fprintf(f,"%s\n",log);
+if(verif(log,pass)==0)
+{window2=create_ajEspaceAd();
+gtk_widget_destroy(win1);
+gtk_widget_show(window2);
+fprintf(g,"1");
+}
+else if(verif(log,pass)==1)
+{win3=create_Espace_Emp ();
+gtk_widget_destroy(win1);
+gtk_widget_show(win3);
+fprintf(g,"1");
+
+}
+else if(verif(log,pass)==2)
+{win4=create_EspaceCli ();
+gtk_widget_destroy(win1);
+gtk_widget_show(win4);
+fprintf(g,"1");
+}
+else{
+strcpy(res,"impossible de se connecter ...");
+gtk_label_set_text(GTK_LABEL(output),res);
+fprintf(g,"0");}
+fclose(f);
+fclose(g);
+}
+
+
+void
+on_ajAjoutEmp_clicked                  (GtkWidget       *objet,
+                                        gpointer         user_data)
+{char res[40],rol[20],ch[20],ch1[20],ch2[20];
+GtkWidget *input1,*input2,*input3,*input4,*input5,*input6,*input7,*input8,*input9,*input10,*output,*window1,*window2,*treeview,*output1;
+int c,p,r,v;
+
+user us;
+input1 = lookup_widget(objet, "ajNomEmp") ;
+input2= lookup_widget(objet, "ajPrenomEmp") ;
+input3 = lookup_widget(objet, "ajIdEmp") ;
+input4=lookup_widget(objet, "ajRoleEmp123") ;
+input5= lookup_widget(objet, "ajCinEmp") ;
+input6= lookup_widget(objet, "ajMailEmp") ;
+input7= lookup_widget(objet, "ajAdressEmp") ;
+input8= lookup_widget(objet, "ajLoginEmp") ;
+input9= lookup_widget(objet, "ajPassEmp") ;
+input10= lookup_widget(objet, "ajPhoneEmp") ;
+output1= lookup_widget(objet, "ajAjoutEMPR") ;
+output= lookup_widget(objet, "ajErrAjoutEmp") ;
+strcpy(ch2,gtk_combo_box_get_active_text(GTK_COMBO_BOX(input4)));
+if(ch2[0]=='E')
+us.role=1;
+else
+us.role=0;
+
+strcpy(us.nom,gtk_entry_get_text(GTK_ENTRY(input1)));
+strcpy(us.prenom,gtk_entry_get_text(GTK_ENTRY(input2)));
+strcpy(us.id,gtk_entry_get_text(GTK_ENTRY(input3)));
+strcpy(us.mail,gtk_entry_get_text(GTK_ENTRY(input6)));
+strcpy(ch,gtk_entry_get_text(GTK_ENTRY(input5)));
+sscanf(ch,"%d",&(us.cin));
+strcpy(us.adresse,gtk_entry_get_text(GTK_ENTRY(input7)));
+strcpy(us.login,gtk_entry_get_text(GTK_ENTRY(input8)));
+strcpy(us.pass,gtk_entry_get_text(GTK_ENTRY(input9)));
+strcpy(ch1,gtk_entry_get_text(GTK_ENTRY(input10)));
+sscanf(ch1,"%d",&(us.phone));
+v=ajouter_Employe(us);
+
+if((v==-1)||(!strlen(ch2)))
+{strcpy(res,"veuillez verifier vos informations !");
+gtk_label_set_text(GTK_LABEL(output),res);}
+else if(v==0){
+strcpy(res,"Idenfiant déjà existant !");
+gtk_label_set_text(GTK_LABEL(output),res);}
+else if(v==2){
+strcpy(res,"login déjà existant !");
+gtk_label_set_text(GTK_LABEL(output),res);}
+else{
+strcpy(res,"Ajout réussit");
+window1 = lookup_widget(objet, "Ajout_Employe") ;
+window2 = lookup_widget(objet, "GestionEmp") ;
+gtk_widget_destroy(window1);
+window2=create_GestionEmp();
+treeview=lookup_widget(window2,"ajAffichageEmp");
+Afficher_user(treeview,1);
+gtk_widget_show(window2);
+
+gtk_label_set_text(GTK_LABEL(output1),res);
+
+}
+
+
+}
+
+
+
+
+void
+on_ajGoToAjoutEmploy_clicked           (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget *win1,*win2,*output1;
+win1 = lookup_widget(objet, "GestionEmp") ;
+win2= lookup_widget(objet, "Ajout_Employe") ;
+output1=lookup_widget(objet, "mmmm") ;
+win2=create_Ajout_Employe();
+gtk_widget_destroy(win1);
+gtk_widget_show(win2);
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+void
+on_ajModifEmploy_clicked               (GtkWidget      *objet,
+                                        gpointer         user_data)
+{char id[30];
+user u[200];
+int n,i;
+FILE* f=fopen("modif.txt","w");
+GtkWidget *input,*output1,*win1,*win2,*input1,*input2,*input3,*input4,*input5,*input6,*input7,*input8,*input9;
+input= lookup_widget(objet, "ajTSMEmp") ;
+output1= lookup_widget(objet, "ajErrTSMEMP") ;
+n=getUsers(u);
+strcpy(id,gtk_entry_get_text(GTK_ENTRY(input)));
+i=recherche(id,1);
+if(i==-1)
+gtk_label_set_text(GTK_LABEL(output1),"identifiant invalide!!");
+else{
+win1 = lookup_widget(objet, "GestionEmp") ;
+win2= lookup_widget(objet, "Modifier_Employe") ;
+gtk_widget_destroy(win1);
+win2=create_Modifier_Employe();
+input1=lookup_widget(win2, "ajIDAgentEmp1") ;
+input2=lookup_widget(win2, "ajNomEmp1") ;
+input3=lookup_widget(win2, "ajPrenomEmp1") ;
+input4=lookup_widget(win2, "ajCinEmp1") ;
+input5=lookup_widget(win2, "ajMailEmp1") ;
+input6=lookup_widget(win2, "ajAdressEmp1") ;
+input7=lookup_widget(win2, "ajLoginEmp1") ;
+input8=lookup_widget(win2, "ajPassEmp1") ;
+input9=lookup_widget(win2, "ajPhoneEmp1") ;
+gtk_entry_set_text(GTK_ENTRY(input1),u[i].id);
+gtk_entry_set_text(GTK_ENTRY(input2),u[i].nom);
+gtk_entry_set_text(GTK_ENTRY(input3),u[i].prenom);
+sprintf(id,"%d\0",u[i].cin);
+gtk_entry_set_text(GTK_ENTRY(input4),id);
+gtk_entry_set_text(GTK_ENTRY(input5),u[i].mail);
+gtk_entry_set_text(GTK_ENTRY(input6),u[i].adresse);
+gtk_entry_set_text(GTK_ENTRY(input7),u[i].login);
+gtk_entry_set_text(GTK_ENTRY(input8),u[i].pass);
+sprintf(id,"%d\0",u[i].phone);
+gtk_entry_set_text(GTK_ENTRY(input9),id);
+
+
+
+
+gtk_widget_show(win2);
+
+fprintf(f,"%s\n",id);
+fclose(f);
+}
+}
+
+
+void
+on_ajModifEmp_clicked                  (GtkWidget       *objet,
+                                        gpointer         user_data)
+{user us,t[200];
+int n=getUsers( t);
+char ch1[20],ch[20],ch2[20];
+int j,i,tt=1;
+GtkWidget *input,*input1,*input2,*input3,*output,*output1,*input5,*input6,*input7,*input8 ,*input9,*input10,*input4,*output2,*win1,*win2,*treeview;
+FILE* f=fopen("modif.txt","r");
+input = lookup_widget(objet, "ajIDAgentEmp1") ;
+input1 = lookup_widget(objet, "ajNomEmp1") ;
+input2= lookup_widget(objet, "ajPrenomEmp1") ;
+input3 = lookup_widget(objet, "ajRoleEmp1") ;
+input5= lookup_widget(objet, "ajCinEmp1") ;
+input6= lookup_widget(objet, "ajMailEmp1") ;
+input7= lookup_widget(objet, "ajAdressEmp1") ;
+input8=lookup_widget(objet, "ajLoginEmp1") ;
+input9=lookup_widget(objet, "ajPassEmp1") ;
+input10= lookup_widget(objet, "ajPhoneEmp1") ;
+strcpy(us.id,gtk_entry_get_text(GTK_ENTRY(input)));
+output= lookup_widget(objet, "ajErrModifEmp") ;
+strcpy(ch2,gtk_combo_box_get_active_text(GTK_COMBO_BOX(input3)));
+if(ch2[0]=='A')
+us.role=0;
+else if(ch2[0]=='E')
+us.role=1;
+else
+us.role=2;
+strcpy(us.nom,gtk_entry_get_text(GTK_ENTRY(input1)));
+strcpy(us.prenom,gtk_entry_get_text(GTK_ENTRY(input2)));
+
+strcpy(us.mail,gtk_entry_get_text(GTK_ENTRY(input6)));
+strcpy(ch,gtk_entry_get_text(GTK_ENTRY(input5)));
+sscanf(ch,"%d",&(us.cin));
+strcpy(us.adresse,gtk_entry_get_text(GTK_ENTRY(input7)));
+j=recherche(us.id,1);
+strcpy(us.login,gtk_entry_get_text(GTK_ENTRY(input8)));
+strcpy(us.pass,gtk_entry_get_text(GTK_ENTRY(input9)));
+strcpy(ch1,gtk_entry_get_text(GTK_ENTRY(input10)));
+sscanf(ch1,"%d",&(us.phone));
+if(us.role==2)
+us.classe=0;
+else
+us.classe=-1;
+for(i=0;i<n;i++)
+if((test(us.id,t[i].id)==0)&&(test(us.login,t[i].login)==1))
+{tt=0;
+break;}
+if(strlen(us.nom)==0)
+strcpy(us.nom,t[j].nom);
+if(strlen(us.prenom)==0)
+strcpy(us.prenom,t[j].prenom);
+if(strlen(us.mail)==0)
+strcpy(us.mail,t[j].mail);
+if((strlen(us.adresse)==0))
+strcpy(us.adresse,t[j].adresse);
+if((strlen(us.login)==0)||(!tt))
+strcpy(us.login,t[j].login);
+if(strlen(us.pass)==0)
+strcpy(us.pass,t[j].pass);
+if(us.phone==0)
+us.phone=t[j].phone;
+if(us.cin==0)
+us.cin=t[j].cin;
+modifUser(us);
+win1 = lookup_widget(objet, "GestionEmp") ;
+win2= lookup_widget(objet, "Modifier_Employe") ;
+win1=create_GestionEmp();
+treeview=lookup_widget(win1,"ajAffichageEmp");
+
+gtk_widget_destroy(win2);
+gtk_widget_show(win1);
+Afficher_user(treeview,1);
+output2= lookup_widget(win1, "ajErrTSMEMP") ;
+gtk_label_set_text(GTK_LABEL(output2),"Modification réussite");
+fclose(f);
+}
+
+
+void
+on_ajSuppEmploy_clicked                (GtkWidget       *objet,
+                                        gpointer         user_data)
+{GtkWidget *input,*output1,*treeview,*win1;
+char id[20];
+input= lookup_widget(objet, "ajTSMEmp") ;
+output1= lookup_widget(objet, "ajErrTSMEMP") ;
+strcpy(id,gtk_entry_get_text(GTK_ENTRY(input)));
+if(recherche(id,1)==-1)
+gtk_label_set_text(GTK_LABEL(output1),"identifiant invalide!!");
+else{
+supprime(id);
+win1 = lookup_widget(objet, "GestionEmp") ;
+gtk_widget_destroy(win1);
+
+win1=create_GestionEmp();
+gtk_widget_show(win1);
+treeview=lookup_widget(win1,"ajAffichageEmp");
+Afficher_user(treeview,1);
+gtk_label_set_text(GTK_LABEL(output1),"Supression réussite");
+
+
+}
+}
+
+
+void
+on_ajaffaff_clicked                    (GtkWidget       *objet,
+                                        gpointer         user_data)
+{GtkWidget *input1,*input2,*input3,*input4,*input5,*input6,*input7,*input8,*win;
+FILE* f=fopen("modifUS.txt","r");
+user u[200];
+int i,n=getUsers(u);
+char ch[20];
+fscanf(f,"%s\n",ch);
+for(i=0;i<n;i++)
+if((u[i].role==0)&&(test(u[i].login,ch)==1))
+break;
+input1= lookup_widget(objet, "ajset1") ;
+win= lookup_widget(objet, "ajfixed15") ;
+input2= lookup_widget(objet, "ajset2") ;
+input3= lookup_widget(objet, "ajset3") ;
+input4= lookup_widget(objet, "ajset4") ;
+input5= lookup_widget(objet, "ajset5") ;
+input6= lookup_widget(objet, "ajset6") ;
+input7= lookup_widget(objet, "ajset7") ;
+input8= lookup_widget(objet, "ajset8") ;
+gtk_label_set_text(GTK_LABEL(input1),u[i].id);
+gtk_label_set_text(GTK_LABEL(input2),u[i].prenom);
+gtk_label_set_text(GTK_LABEL(input3),u[i].nom);
+sprintf(ch,"%d\0",u[i].cin);
+gtk_label_set_text(GTK_LABEL(input4),ch);
+gtk_label_set_text(GTK_LABEL(input5),u[i].mail);
+gtk_label_set_text(GTK_LABEL(input6),u[i].adresse);
+gtk_label_set_text(GTK_LABEL(input7),u[i].login);
+sprintf(ch,"%d\0",u[i].phone);
+gtk_label_set_text(GTK_LABEL(input8),ch);
+gtk_widget_show(win);
+}
+
+
+void
+on_ajModifInfoAdm_clicked              (GtkWidget       *objet,
+                                        gpointer         user_data)
+{FILE *f;
+int tt=1;
+GtkWidget *input1,*win,*input2,*input3,*input4,*input5,*input6,*input7,*input8,*input9,*input;
+input= lookup_widget(objet, "ajIDENAdm") ;
+input1= lookup_widget(objet, "ajPrenomAdm") ;
+win= lookup_widget(objet, "ajMSGERRMAD") ;
+input2= lookup_widget(objet, "ajNomAdm") ;
+//input3= lookup_widget(objet, "ajroleAD") ;
+input4= lookup_widget(objet, "ajCinAdm") ;
+input5= lookup_widget(objet, "ajMailAdm") ;
+input6= lookup_widget(objet, "ajAdressAdm") ;
+input7= lookup_widget(objet, "ajLoginAdm") ;
+input8= lookup_widget(objet, "ajPassAdm") ;
+input9= lookup_widget(objet, "ajPhoneAdm") ;
+user us,u[200];
+int i,j,n=getUsers(u);
+char ch[20],st[70];
+
+strcpy(us.id,gtk_entry_get_text(GTK_ENTRY(input)));
+for(i=0;i<n;i++)
+if((u[i].role==0)&&(test(u[i].id,us.id)==1))
+break;
+
+strcpy(us.prenom,gtk_entry_get_text(GTK_ENTRY(input1)));
+strcpy(us.nom,gtk_entry_get_text(GTK_ENTRY(input2)));
+strcpy(st,gtk_entry_get_text(GTK_ENTRY(input4)));
+sscanf(st,"%d",&us.cin);
+strcpy(us.mail,gtk_entry_get_text(GTK_ENTRY(input5)));
+strcpy(us.adresse,gtk_entry_get_text(GTK_ENTRY(input6)));
+strcpy(us.login,gtk_entry_get_text(GTK_ENTRY(input7)));
+strcpy(us.pass,gtk_entry_get_text(GTK_ENTRY(input8)));
+strcpy(ch,gtk_entry_get_text(GTK_ENTRY(input9)));
+sscanf(ch,"%d",&us.phone);
+//strcpy(st,gtk_combo_box_get_active_text(GTK_COMBO_BOX(input3)));
+for(j=0;j<n;j++)
+{if((test(u[j].login,us.login)==1)&&(test(us.id,u[j].id)==0))
+{gtk_label_set_text(GTK_LABEL(win),"login déjà existant!");
+tt=0;
+break;
+}}
+if(tt){
+
+us.role=0;
+us.classe=-1;
+if(strlen(us.nom)==0)
+strcpy(us.nom,u[i].nom);
+if(strlen(us.prenom)==0)
+strcpy(us.prenom,u[i].prenom);
+if(strlen(us.mail)==0)
+strcpy(us.mail,u[i].mail);
+if((strlen(us.adresse)==0))
+strcpy(us.adresse,u[i].adresse);
+if((strlen(us.login)==0)||(!tt))
+strcpy(us.login,u[i].login);
+if(strlen(us.pass)==0)
+strcpy(us.pass,u[i].pass);
+if(us.phone==0)
+us.phone=u[i].phone;
+if(us.cin==0)
+us.cin=u[i].cin;
+
+u[i]=us;
+
+f=fopen("modifUS.txt","w");
+fprintf(f,us.login);
+fclose(f);
+updateUsers(u,n);
+gtk_label_set_text(GTK_LABEL(win),"modification réussite");
+}
+return 1;
+}
+
+
+void
+on_ajSuppCompteAdm_clicked             (GtkWidget       *objet,
+                                        gpointer         user_data)
+{user u[200];
+FILE* f=fopen("modifUS.txt","r");
+int i,j,n=getUsers(u);
+GtkWidget *input1,*win,*win1;
+char ch[20];
+win= lookup_widget(objet, "GestioncompteAdmin") ;
+win1=lookup_widget(objet, "auth") ;
+fscanf(f,"%s\n",ch);
+fclose(f);
+for(i=0;i<n;i++)
+if((u[i].role==0)&&(test(u[i].login,ch)==1))
+break;
+int t=supprime(u[i].id);
+input1= lookup_widget(objet, "ajMSGERRMAD") ;
+if(!t)
+gtk_label_set_text(GTK_LABEL(input1),"suppression non validé");
+else{
+gtk_widget_destroy(win);
+
+win1=create_auth();
+gtk_widget_show(win1);
+}
+
+}
+
+
+void
+on_ajAjoutAdmn_clicked                 (GtkWidget       *objet,
+                                        gpointer         user_data)
+{GtkWidget *window1,*window2;
+window1 = lookup_widget(objet, "Ajout_Admin") ;
+window2 = lookup_widget(objet, "GestioncompteAdmin") ;
+gtk_widget_destroy(window2);
+window1=create_Ajout_Admin();
+gtk_widget_show(window1);
+
+
+
+}
+
+
+void
+on_ajAjoutAdm1_clicked                 (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+char res[40],rol[20],ch[20],ch1[20];
+GtkWidget *input1,*input2,*input3,*input4,*input5,*input6,*input7,*input8,*input9,*input10,*output,*window1,*window2,*treeview,*output1;
+int c,p,r,v;
+
+user us;
+input1 = lookup_widget(objet, "ajNomAdm1") ;
+input2= lookup_widget(objet, "ajPrenomAdm1") ;
+input3 = lookup_widget(objet, "ajIdAdm1") ;
+
+input5= lookup_widget(objet, "ajCinAdm1") ;
+input6= lookup_widget(objet, "ajMailAdm1") ;
+input7= lookup_widget(objet, "ajAdressAdm1") ;
+input8= lookup_widget(objet, "ajLoginAdm1") ;
+input9= lookup_widget(objet, "ajPassAdm1") ;
+input10= lookup_widget(objet, "ajPhoneAdm1") ;
+output= lookup_widget(objet, "ajResAjoutAdm") ;
+
+
+us.role=0;
+
+strcpy(us.nom,gtk_entry_get_text(GTK_ENTRY(input1)));
+strcpy(us.prenom,gtk_entry_get_text(GTK_ENTRY(input2)));
+strcpy(us.id,gtk_entry_get_text(GTK_ENTRY(input3)));
+strcpy(us.mail,gtk_entry_get_text(GTK_ENTRY(input6)));
+strcpy(ch,gtk_entry_get_text(GTK_ENTRY(input5)));
+sscanf(ch,"%d",&(us.cin));
+strcpy(us.adresse,gtk_entry_get_text(GTK_ENTRY(input7)));
+strcpy(us.login,gtk_entry_get_text(GTK_ENTRY(input8)));
+strcpy(us.pass,gtk_entry_get_text(GTK_ENTRY(input9)));
+strcpy(ch1,gtk_entry_get_text(GTK_ENTRY(input10)));
+sscanf(ch1,"%d",&(us.phone));
+v=ajouter_Employe(us);
+if(v==0){
+strcpy(res,"Idenfiant déjà existant !");
+gtk_label_set_text(GTK_LABEL(output),res);}
+else if(v==2){
+strcpy(res,"login déjà existant !");
+gtk_label_set_text(GTK_LABEL(output),res);}
+else{
+strcpy(res,"Ajout réussit");
+window1 = lookup_widget(objet, "Ajout_Admin") ;
+window2 = lookup_widget(objet, "GestioncompteAdmin") ;
+gtk_widget_destroy(window1);
+window2=create_GestioncompteAdmin();
+gtk_widget_show(window2);
+
+}
+
+
+}
+
+
+void
+on_ajGestionCli_clicked                (GtkWidget      *objet,
+                                        gpointer         user_data)
+{
+GtkWidget *window1,*window2,*treeview;
+
+window1 = lookup_widget(objet, "ajEspaceAd") ;
+window2 = lookup_widget(objet, "GestionClients") ;
+
+window2=create_GestionClients();
+gtk_widget_show(window2);
+treeview=lookup_widget(window2,"ajAffichage");
+Afficher_user(treeview,2);
+
+}
+
+
+void
+on_ajAjouterCli_clicked                (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget *window1,*window2,*treeview;
+
+window1 = lookup_widget(objet, "GestionClients") ;
+window2 = lookup_widget(objet, "Ajout_client") ;
+gtk_widget_destroy(window1);
+window2=create_Ajout_client();
+gtk_widget_show(window2);
+
+
+}
+
+
+void
+on_ajAjoutCli_clicked                  (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+char res[40],rol[20],ch[20],ch1[20];
+GtkWidget *input1,*input2,*input3,*input4,*input5,*input6,*input7,*input8,*input9,*input10,*output,*window1,*window2,*treeview,*output1;
+int c,p,r,v;
+
+user us;
+input1 = lookup_widget(objet, "ajNomCli1") ;
+input2= lookup_widget(objet, "ajPrenomCli1") ;
+input3 = lookup_widget(objet, "ajIdCli1") ;
+input4 = lookup_widget(objet, "ajClasseCli1") ;
+input5= lookup_widget(objet, "ajCinCli1") ;
+input6= lookup_widget(objet, "ajMailCli1") ;
+input7= lookup_widget(objet, "ajAdressCli1") ;
+input8= lookup_widget(objet, "ajLoginCli1") ;
+input9= lookup_widget(objet, "ajPassCli1") ;
+input10= lookup_widget(objet, "ajPhoneCli1") ;
+output= lookup_widget(objet, "ajResAjoutCli1") ;
+
+
+us.role=2;
+
+strcpy(us.nom,gtk_entry_get_text(GTK_ENTRY(input1)));
+strcpy(us.prenom,gtk_entry_get_text(GTK_ENTRY(input2)));
+strcpy(us.id,gtk_entry_get_text(GTK_ENTRY(input3)));
+strcpy(us.mail,gtk_entry_get_text(GTK_ENTRY(input6)));
+strcpy(ch,gtk_entry_get_text(GTK_ENTRY(input5)));
+sscanf(ch,"%d",&(us.cin));
+strcpy(us.adresse,gtk_entry_get_text(GTK_ENTRY(input7)));
+strcpy(us.login,gtk_entry_get_text(GTK_ENTRY(input8)));
+strcpy(us.pass,gtk_entry_get_text(GTK_ENTRY(input9)));
+strcpy(ch1,gtk_entry_get_text(GTK_ENTRY(input10)));
+sscanf(ch1,"%d",&(us.phone));
+strcpy(ch1,gtk_combo_box_get_active_text(GTK_COMBO_BOX(input4)));
+if(ch1[0]=='B')
+us.classe=0;
+else if(ch1[0]=='S')
+us.classe=1;
+else if(ch1[0]=='G')
+us.classe=2;
+else
+us.classe=0;
+v=ajouter_Employe(us);
+if(v==-1)
+{strcpy(res,"veuillez verifier vos informations !");
+gtk_label_set_text(GTK_LABEL(output),res);
+}
+else if(v==0){
+strcpy(res,"Idenfiant déjà existant !");
+gtk_label_set_text(GTK_LABEL(output),res);}
+else if(v==2){
+strcpy(res,"login déjà existant !");
+gtk_label_set_text(GTK_LABEL(output),res);}
+else{
+strcpy(res,"Ajout réussit");
+window1 = lookup_widget(objet, "Ajout_client") ;
+window2 = lookup_widget(objet, "GestioncompteAdmin") ;
+gtk_widget_destroy(window1);
+window2=create_GestionClients();
+gtk_widget_show(window2);
+treeview=lookup_widget(window2,"ajAffichage");
+Afficher_user(treeview,2);
+}
+}
+
+
+void
+on_ajModifierCli_clicked               (GtkWidget       *objet,
+                                        gpointer         user_data)
+{char id[30],ch[20];
+user u[200];
+int i,n;
+n=getUsers(u);
+FILE* f=fopen("modif.txt","w");
+GtkWidget *input,*output1,*win1,*win2,*input1,*input2,*input3,*input4,*input5,*input6,*input7;
+input= lookup_widget(objet, "ajChoixIDClient") ;
+output1= lookup_widget(objet, "ajBModifSuppCli") ;
+
+strcpy(id,gtk_entry_get_text(GTK_ENTRY(input)));
+i=recherche(id,2);
+if(i==-1)
+gtk_label_set_text(GTK_LABEL(output1),"identifiant invalide!!");
+else{
+win1 = lookup_widget(objet, "GestionClients") ;
+win2= lookup_widget(objet, "Modifier_Client") ;
+
+gtk_widget_destroy(win1);
+
+win2=create_Modifier_Client();
+input1= lookup_widget(win2, "ajIdentiCli") ;
+input2= lookup_widget(win2, "ajNomCli") ;
+input3= lookup_widget(win2, "ajPrenomCli") ;
+input4= lookup_widget(win2, "ajCinCli") ;
+input5= lookup_widget(win2, "ajMailCli") ;
+input6= lookup_widget(win2, "ajAdressCli") ;
+input7= lookup_widget(win2, "ajPhoneCli") ;
+gtk_entry_set_text(GTK_ENTRY(input1),u[i].id);
+gtk_entry_set_text(GTK_ENTRY(input2),u[i].nom);
+gtk_entry_set_text(GTK_ENTRY(input3),u[i].prenom);
+sprintf(ch,"%d\0",u[i].cin);
+gtk_entry_set_text(GTK_ENTRY(input4),ch);
+gtk_entry_set_text(GTK_ENTRY(input5),u[i].mail);
+gtk_entry_set_text(GTK_ENTRY(input6),u[i].adresse);
+sprintf(ch,"%d\0",u[i].phone);
+gtk_entry_set_text(GTK_ENTRY(input7),ch);
+
+gtk_widget_show(win2);
+fprintf(f,"%s\n",id);
+fclose(f);
+}
+}
+
+
+void
+on_ajModifCli_clicked                  (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+user us,t[200];
+int n=getUsers( t);
+char ch1[20],ch[20],ch2[20];
+int j;
+GtkWidget *getid,*input1,*input2,*input3,*output,*output1,*input5,*input6,*input7,*input8 ,*input9,*input10,*input4,*output2,*win1,*win2,*treeview;
+FILE* f=fopen("modif.txt","r");
+input1 = lookup_widget(objet, "ajNomCli") ;
+input2= lookup_widget(objet, "ajPrenomCli") ;
+input3 = lookup_widget(objet, "AjClassCli") ;
+input5= lookup_widget(objet, "ajCinCli") ;
+input6= lookup_widget(objet, "ajMailCli") ;
+input7= lookup_widget(objet, "ajAdressCli") ;
+getid=lookup_widget(objet, "ajIdentiCli") ;
+input10= lookup_widget(objet, "ajPhoneCli") ;
+strcpy(us.id,gtk_entry_get_text(GTK_ENTRY(getid)));
+strcpy(ch2,gtk_combo_box_get_active_text(GTK_COMBO_BOX(input3)));
+if(ch2[0]=='B')
+us.classe=0;
+else if(ch2[0]=='S')
+us.classe=1;
+else
+us.classe=2;
+strcpy(us.nom,gtk_entry_get_text(GTK_ENTRY(input1)));
+strcpy(us.prenom,gtk_entry_get_text(GTK_ENTRY(input2)));
+
+strcpy(us.mail,gtk_entry_get_text(GTK_ENTRY(input6)));
+strcpy(ch,gtk_entry_get_text(GTK_ENTRY(input5)));
+sscanf(ch,"%d",&(us.cin));
+strcpy(us.adresse,gtk_entry_get_text(GTK_ENTRY(input7)));
+j=recherche(us.id,2);
+strcpy(us.login,t[j].login);
+strcpy(us.pass,t[j].pass);
+strcpy(ch1,gtk_entry_get_text(GTK_ENTRY(input10)));
+sscanf(ch1,"%d",&(us.phone));
+us.role=2;
+if(strlen(us.nom)==0)
+strcpy(us.nom,t[j].nom);
+if(strlen(us.prenom)==0)
+strcpy(us.prenom,t[j].prenom);
+if(strlen(us.mail)==0)
+strcpy(us.mail,t[j].mail);
+if((strlen(us.adresse)==0))
+strcpy(us.adresse,t[j].adresse);
+if((strlen(us.login)==0))
+strcpy(us.login,t[j].login);
+if(strlen(us.pass)==0)
+strcpy(us.pass,t[j].pass);
+if(us.phone==0)
+us.phone=t[j].phone;
+if(us.cin==0)
+us.cin=t[j].cin;
+modifUser(us);
+win1 = lookup_widget(objet, "GestionClients") ;
+win2= lookup_widget(objet, "Modifier_Client") ;
+
+win1=create_GestionClients();
+treeview=lookup_widget(win1,"ajAffichage");
+
+gtk_widget_destroy(win2);
+gtk_widget_show(win1);
+Afficher_user(treeview,2);
+output2= lookup_widget(objet, "ajErrTSMEMP") ;
+gtk_label_set_text(GTK_LABEL(output2),"Modification réussite");
+fclose(f);
+}
+
+
+
+
+void
+on_ajSupprimerCli_clicked              (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget *input,*output1,*treeview,*win1;
+char id[20];
+input= lookup_widget(objet, "ajChoixIDClient") ;
+output1= lookup_widget(objet, "ajBModifSuppCli") ;
+strcpy(id,gtk_entry_get_text(GTK_ENTRY(input)));
+if(recherche(id,2)==-1)
+gtk_label_set_text(GTK_LABEL(output1),"identifiant invalide!!");
+else{
+supprime(id);
+win1 = lookup_widget(objet, "GestionClients") ;
+gtk_widget_destroy(win1);
+
+win1=create_GestionClients();
+gtk_widget_show(win1);
+treeview=lookup_widget(win1,"ajAffichage");
+Afficher_user(treeview,2);
+gtk_label_set_text(GTK_LABEL(output1),"Supression réussite");
+
+
+}
+}
+
+
+void
+on_ajRecherche_clicked                 (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget *window1,*window2,*treeview;
+
+window1 = lookup_widget(objet, "ajEspaceAd") ;
+window2 = lookup_widget(objet, "Recherche") ;
+
+gtk_widget_destroy(window1);
+window2=create_Recherche();
+treeview=lookup_widget(window2, "ajaffichagederecherche") ;
+gtk_widget_show(window2);
+Afficher(treeview);
+}
+
+
+void
+on_ajRechercher_clicked                (GtkWidget       *objet,
+                                        gpointer         user_data)
+{GtkWidget *win,*input1,*input2,*output,*treeview,*win1,*input3,*input4,*input5,*input6,*input7,*input8,*input9,*input10;
+char ch2[20],id[20];
+user u[200];
+int n,i,x;
+n=getUsers(u);
+input1 = lookup_widget(objet, "ajRoleRech") ;
+win1= lookup_widget(objet, "ajRechfix") ;
+input2= lookup_widget(objet, "ajIdRech") ;
+output= lookup_widget(objet, "AJerrOR") ;
+win=lookup_widget(objet, "Recherche") ;
+treeview=lookup_widget( objet,"ajsxs") ;
+strcpy(ch2,gtk_combo_box_get_active_text(GTK_COMBO_BOX(input1)));
+if(ch2[0]=='E')
+x=1;
+else if(ch2[0]=='C')
+x=2;
+else
+x=-1;
+strcpy(id,gtk_entry_get_text(GTK_ENTRY(input2)));
+if(x!=-1)
+{for(i=0;i<n;i++)
+if((test(u[i].id,id)==1)&&(u[i].role==x))
+break;
+if(i==n)
+{gtk_label_set_text(GTK_LABEL(output),"Identifiant invalide");
+gtk_widget_show(output);
+gtk_widget_hide(win1);
+gtk_widget_show(treeview);
+}
+else{
+gtk_widget_hide(treeview);
+
+char ch[20];
+input3= lookup_widget(objet, "ajidrech1") ;
+gtk_widget_hide(output);
+input4= lookup_widget(objet, "ajprenrech1") ;
+input5= lookup_widget(objet, "ajnomrech1") ;
+input6= lookup_widget(objet, "ajcinrech1") ;
+input7= lookup_widget(objet, "ajmailrech1") ;
+input8= lookup_widget(objet, "ajadresserech1") ;
+input9= lookup_widget(objet, "ajloginrech1") ;
+input10= lookup_widget(objet, "ajtelephonerech1") ;
+gtk_label_set_text(GTK_LABEL(input3),u[i].id);
+gtk_label_set_text(GTK_LABEL(input4),u[i].prenom);
+gtk_label_set_text(GTK_LABEL(input5),u[i].nom);
+sprintf(ch,"%d\0",u[i].cin);
+gtk_label_set_text(GTK_LABEL(input6),ch);
+gtk_label_set_text(GTK_LABEL(input7),u[i].mail);
+gtk_label_set_text(GTK_LABEL(input8),u[i].adresse);
+gtk_label_set_text(GTK_LABEL(input9),u[i].login);
+sprintf(ch,"%d\0",u[i].phone);
+gtk_label_set_text(GTK_LABEL(input10),ch);
+gtk_widget_show(win1);
+
+
+}
+
+}
+}
+
+
+void
+on_aJretour1_clicked                   (GtkWidget       *objet,
+                                        gpointer         user_data)
+{GtkWidget *win1,*win2,*win3,*win4,*win5;
+win1= lookup_widget(objet, "GestionEmp") ;
+win2= lookup_widget(objet, "GestionClients") ;
+win3= lookup_widget(objet, "GestioncompteAdmin") ;
+win5= lookup_widget(objet, "Recherche") ;
+win4= lookup_widget(objet, "ajEspaceAd") ;
+gtk_widget_destroy(win1);
+gtk_widget_destroy(win5);
+gtk_widget_destroy(win2);
+gtk_widget_destroy(win3);
+win4=create_ajEspaceAd();
+gtk_widget_show(win4);
+}
+
+
+
+void
+on_AZretour12_clicked                  (GtkWidget       *objet,
+                                        gpointer         user_data)
+{GtkWidget *win1,*win2,*treeview;
+win1= lookup_widget(objet, "Ajout_Employe") ;
+win2= lookup_widget(objet, "GestionEmp") ;
+gtk_widget_destroy(win1);
+win2=create_GestionEmp();
+treeview=lookup_widget(win2, "ajAffichageEmp") ;
+
+Afficher_user(treeview,1);
+gtk_widget_show(win2);
+}
+
+
+
+
+
+void
+on_mcAjouterVoiture_clicked            (GtkWidget      *objet,
+                                        gpointer         user_data)
+{
+GtkWidget *window1,*window2;
+
+window1 = lookup_widget(objet, "mcAjoutModificationSupressionVoiture") ;
+window2 = lookup_widget(objet, "mcAjouterVoiture") ;
+gtk_widget_destroy(window1);
+window2=create_mcAjouterVoiture();
+gtk_widget_show(window2);
+}
+
+
+void
+on_mcSupprimerVoiture_clicked          (GtkWidget       *button,
+                                        gpointer         user_data)
+{voiture t[200],v;
+int n,i;
+GtkWidget *identry,*output,*window1,*treeview;
+window1=lookup_widget(button,"mcAjoutModificationSupressionVoiture");
+identry=lookup_widget(button,"mcIDVoitureRechercheEntry");
+output=lookup_widget(button,"mcoutputajoutmodifsuppvoiture");
+char ID[20];
+strcpy(ID,gtk_entry_get_text(GTK_ENTRY(identry)));
+n=lecture(t);
+for(i=0;i<n;i++)
+if(test(ID,t[i].id)==1)
+{
+v=t[i];
+t[i]=t[n-1];
+t[n-1]=v;
+break;
+}
+
+if(i<n)
+{FILE* f=fopen("voiture.txt","w");
+for(i=0;i<n-1;i++)
+fprintf(f,"%s %s %d %d %d %s %s\n", t[i].marque, t[i].modele, t[i].prix_par_jour, t[i].nbr_places, t[i].reste, t[i].climatiseur,t[i].id);
+fclose(f);
+gtk_label_set_text(GTK_LABEL(output),"voiture supprimée");
+}
+else
+gtk_label_set_text(GTK_LABEL(output),"identifiant invalide");
+
+treeview=lookup_widget(window1,"mcListeAjoutModificationSuppressionVoitureTreeview");
+Affichervoiture(treeview,t,n);
+
+}
+
+
+
+void
+on_mcEnregistrervoiture_clicked        (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+voiture v;
+char ch[15],ch1[15],ch2[15],res[45];
+int x;
+GtkWidget *input1,*input2,*input3,*input4,*input5,*input6,*input7,*output,*window1;
+input1= lookup_widget(objet, "mcPrixVoitureAjout") ;
+input2= lookup_widget(objet, "mcMarqueVoitureAjout") ;
+input3= lookup_widget(objet, "mcModeleVoitureAjout") ;
+input4= lookup_widget(objet, "mcIDVoitureAjout") ;
+input5= lookup_widget(objet, "mcClimatieurAjout") ;
+input6= lookup_widget(objet, "mcNbrPlacesAjout") ;
+input7= lookup_widget(objet, "mcResteAjoutVoiture") ;
+output=lookup_widget(objet, "mcoutputAjoutVoiture");
+
+strcpy(ch,gtk_entry_get_text(GTK_ENTRY(input1)));
+sscanf(ch,"%d",&(v.prix_par_jour));
+strcpy(v.marque,gtk_entry_get_text(GTK_ENTRY(input2)));
+strcpy(v.modele,gtk_entry_get_text(GTK_ENTRY(input3)));
+strcpy(v.id,gtk_entry_get_text(GTK_ENTRY(input4)));
+strcpy(v.climatiseur,gtk_combo_box_get_active_text(GTK_COMBO_BOX(input5)));
+strcpy(ch1,gtk_entry_get_text(GTK_ENTRY(input7)));
+sscanf(ch1,"%d",&v.reste);
+strcpy(ch2,gtk_combo_box_get_active_text(GTK_COMBO_BOX(input6)));
+sscanf(ch2,"%d",&v.nbr_places);
+x=ajouter_voiture(v);
+if (x==1) {
+strcpy(res,"voiture ajoutée");
+gtk_label_set_text(GTK_LABEL(output),res);}
+else {
+strcpy(res,"ID existant veuillez entrez un autre ID");
+gtk_label_set_text(GTK_LABEL(output),res);}
+
+}
+
+
+
+
+/*void
+on_fgFacture_clicked                   (GtkButton       *button,
+                                        gpointer         user_data)
+{
+
+}
+
+
+void
+on_fgDevis_clicked                     (GtkButton       *button,
+                                        gpointer         user_data)
+{
+
+}
+
+
+void
+on_fgRetourVersEspace_clicked          (GtkButton       *button,
+                                        gpointer         user_data)
+{
+
+}
+
+
+void
+on_fgButtonRechercheDevis_clicked      (GtkButton       *button,
+                                        gpointer         user_data)
+{
+
+}
+
+
+void
+on_fgButtonSuppDevis_clicked           (GtkButton       *button,
+                                        gpointer         user_data)
+{
+
+}
+
+
+void
+on_fgButtonRechercheFacture_clicked    (GtkButton       *button,
+                                        gpointer         user_data)
+{
+
+}
+
+
+void
+on_fgButtonRechercheFacture1_clicked   (GtkButton       *button,
+                                        gpointer         user_data)
+{
+
+}
+
+
+void
+on_fgRetourVersFacture_clicked         (GtkButton       *button,
+                                        gpointer         user_data)
+{
+
+}*/
+
+
+void
+on_jbButtonchercher_clicked            (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget *jbCherchervol,*jbListevolallretclient12,*jbTreeviewallret12,*jbTreeviewret,*jbTreeviewallsimple,*jbListevolallsimpleclient;
+GtkWidget *Jour,*output,*output1,*fixeda,*fixedb;
+GtkWidget *Mois;
+GtkWidget *Annee;GtkWidget *Jour1;
+GtkWidget *Mois1;
+GtkWidget *Annee1;
+GtkWidget *input1;
+GtkWidget *input2;
+GtkWidget *input3;
+GtkWidget *Comboboxclasse;
+Vol a;Vol a1;int nbr1;int jbtest;
+fixeda=lookup_widget(objet,"jbFixedALLSIMPLE");
+fixedb=lookup_widget(objet,"jbFixedazerty");
+FILE* f=fopen("verif_all_ret_temp.txt","r");
+fscanf(f,"%d",&jbtest);
+fclose(f);
+FILE*g=fopen("verif_all_ret_temp.txt","w");
+    fprintf(g,"%d\n",1);
+    fclose(g);
+FILE* e=fopen("etat.txt","r");
+int ab;
+fscanf(e,"%d",&ab);
+if (jbtest==2)
+{ output= lookup_widget(objet, "jbLabelerr") ;
+Jour=lookup_widget(objet,"jbJour");
+Mois=lookup_widget(objet,"jbMois");
+Annee=lookup_widget(objet,"jbAnnee");
+Comboboxclasse=lookup_widget(objet,"jbComboboxclasse1");
+jbCherchervol=lookup_widget(objet,"jbCherchervol");
+jbListevolallsimpleclient=lookup_widget(objet,"jbListevolallsimpleclient");
+a.date.jours=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(Jour));
+a.date.mois=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(Mois));
+a.date.annee=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(Annee));
+if (strcmp("classe economique",gtk_combo_box_get_active_text(GTK_COMBO_BOX(Comboboxclasse)))==0)
+a.classe=1;
+else
+a.classe=2;
+input1=lookup_widget(objet,"jbEntryorigine1");
+input2=lookup_widget(objet,"jbEntrydestination1");
+input3=lookup_widget(objet,"jbEntrynbredeplaces");
+strcpy(a.origine,gtk_entry_get_text(GTK_ENTRY(input1)));
+strcpy(a.destination,gtk_entry_get_text(GTK_ENTRY(input2)));
+char ch[20];
+strcpy(ch,gtk_entry_get_text(GTK_ENTRY(input3)));
+sscanf(ch,"%d",&(a.nbre_de_places));
+sscanf(ch,"%d",&(nbr1));
+Vol x[500];Vol tab1[500]; int m1=0; int x1;
+x1=remplir_tab_avec_la_liste_des_vols(x);
+verif_vol_dispo(x,a,tab1,x1,&m1,nbr1);
+ajouter_tab_all_ds_fichier(tab1,m1);
+if (m1==0)
+{gtk_label_set_text(GTK_LABEL(output),"pas de vol disponible");
+gtk_widget_show(output);
+FILE*o=fopen("verif_all_ret_temp.txt","w");
+    fprintf(o,"%d\n",2);
+    fclose(o);
+a.date.jours=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(Jour));
+a.date.mois=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(Mois));
+a.date.annee=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(Annee));
+if (strcmp("classe economique",gtk_combo_box_get_active_text(GTK_COMBO_BOX(Comboboxclasse)))==0)
+a.classe=1;
+else
+a.classe=2;
+strcpy(a.origine,gtk_entry_get_text(GTK_ENTRY(input1)));
+strcpy(a.destination,gtk_entry_get_text(GTK_ENTRY(input2)));
+char ch[20];
+strcpy(ch,gtk_entry_get_text(GTK_ENTRY(input3)));
+sscanf(ch,"%d",&(a.nbre_de_places));
+sscanf(ch,"%d",&(nbr1));
+Vol x[500];Vol tab1[500]; int m1=0; int x1;
+x1=remplir_tab_avec_la_liste_des_vols(x);
+verif_vol_dispo(x,a,tab1,x1,&m1,nbr1);
+}
+else{
+gtk_widget_hide(output);
+ajouter_tab_all_ds_fichier(tab1,m1);
+
+gtk_widget_destroy(jbCherchervol);
+jbListevolallsimpleclient=create_jbListevolallsimpleclient();
+gtk_widget_show(jbListevolallsimpleclient);
+jbTreeviewallsimple=lookup_widget(jbListevolallsimpleclient,"jbTreeviewallsimple");
+afficher_tous_les_vol1(jbTreeviewallsimple,tab1,m1);
+}
+if(ab==1)
+{fixeda=lookup_widget(jbListevolallsimpleclient,"jbFixedALLSIMPLE");
+gtk_widget_show(fixeda);}
+}
+/*aller retour */
+else
+{output1= lookup_widget(objet, "jbLabelallret15") ;
+Jour1=lookup_widget(objet,"jbJour1");
+Mois1=lookup_widget(objet,"jbMois1");
+Annee1=lookup_widget(objet,"jbAnnee1");
+Jour=lookup_widget(objet,"jbJour");
+Mois=lookup_widget(objet,"jbMois");
+Annee=lookup_widget(objet,"jbAnnee");
+Comboboxclasse=lookup_widget(objet,"jbComboboxclasse1");
+a.date.jours=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(Jour));
+a.date.mois=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(Mois));
+a.date.annee=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(Annee));
+a1.date.jours=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(Jour1));
+a1.date.mois=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(Mois1));
+a1.date.annee=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(Annee1));
+if (strcmp("classe economique",gtk_combo_box_get_active_text(GTK_COMBO_BOX(Comboboxclasse)))==0)
+{a.classe=1;a1.classe=1;}
+else
+{a.classe=2;a1.classe=2;}
+input1=lookup_widget(objet,"jbEntryorigine1");
+input2=lookup_widget(objet,"jbEntrydestination1");
+input3=lookup_widget(objet,"jbEntrynbredeplaces");
+strcpy(a.origine,gtk_entry_get_text(GTK_ENTRY(input1)));
+strcpy(a.destination,gtk_entry_get_text(GTK_ENTRY(input2)));
+strcpy(a1.origine,a.destination);
+strcpy(a1.destination,a.origine);
+a1.classe=a.classe;
+char ch[20];
+strcpy(ch,gtk_entry_get_text(GTK_ENTRY(input3)));
+sscanf(ch,"%d",&(a.nbre_de_places));
+sscanf(ch,"%d",&(nbr1));
+Vol x[500];  Vol tab2[500]; int m2=0; Vol tab1[500]; int m1=0; int x1;
+x1=remplir_tab_avec_la_liste_des_vols(x);
+/* if ((strcmp(a.origine,"")==0) || (strcmp(a.destination,"")==0) || (strcmp(a.nbre_de_places,"")==0)) */
+verif_vol_dispo(x,a,tab1,x1,&m1,nbr1);
+verif_vol_dispo(x,a1,tab2,x1,&m2,nbr1);
+if ((m1==0) || (m2==0))
+{gtk_label_set_text(GTK_LABEL(output1),"pas de vol disponible");
+gtk_widget_show(output1);}
+else{
+gtk_widget_hide(output1);
+ajouter_tab_all_ds_fichier(tab1,m1);
+ajouter_tab_ret_ds_fichier(tab2,m2);
+jbCherchervol=lookup_widget(objet,"jbCherchervol");
+gtk_widget_destroy(jbCherchervol);
+jbListevolallretclient12=lookup_widget(objet,"jbListevolallretclient12");
+jbListevolallretclient12=create_jbListevolallretclient12();
+gtk_widget_show(jbListevolallretclient12);
+jbTreeviewallret12=lookup_widget(jbListevolallretclient12,"jbTreeviewallret12");
+afficher_tous_les_vol1(jbTreeviewallret12,tab1,m1);
+jbTreeviewret=lookup_widget(jbListevolallretclient12,"jbTreeviewret");
+afficher_tous_les_vol1(jbTreeviewret,tab2,m2);
+}
+if(ab==1)
+{fixedb=lookup_widget(jbListevolallretclient12,"jbFixedazerty");
+gtk_widget_show(fixedb);}
+}
+}
+
+
+void
+on_jbRadiobuttonallsimpl_clicked       (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget *input;int x;
+input=lookup_widget(objet,"jbFixedretour");
+gtk_widget_hide(input);
+x=2;
+verif_all_ret(x);
+}
+
+
+void
+on_jbRadiobuttonallret_clicked         (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget *input;int x;
+input=lookup_widget(objet,"jbFixedretour");
+gtk_widget_show(input);
+x=1;
+verif_all_ret(x);
+}
+
+
+void
+on_jbButtonobtdevallret_clicked        (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget *input,*input1,*output,*output1;
+input=lookup_widget(objet,"jbEntryIDallret12");
+input1=lookup_widget(objet,"jbEntryIDallret");
+output=lookup_widget(objet,"jbAlllabel555");
+output1=lookup_widget(objet,"jbRtlabel");
+gtk_widget_hide(output);
+gtk_widget_hide(output1);
+Vol a2;Vol a3;
+strcpy(a2.identifiant,gtk_entry_get_text(GTK_ENTRY(input)));
+strcpy(a3.identifiant,gtk_entry_get_text(GTK_ENTRY(input1)));
+if (verif_ID_vol(a2)==0)
+{gtk_label_set_text(GTK_LABEL(output),"Identifiant invalide");
+gtk_widget_show(output);}
+else gtk_widget_hide(output);
+if (verif_ID_vol1(a3)==0)
+{gtk_label_set_text(GTK_LABEL(output1),"Identifiant invalide");
+gtk_widget_show(output1);}
+else gtk_widget_hide(output1);
+
+}
+
+
+void
+on_ajchercheCli01_clicked              (GtkWidget       *objet,
+                                        gpointer         user_data)
+{GtkWidget *input,*treeview,*output,*win,*win1;
+int p;
+char id[20];
+win1=lookup_widget(objet,"scroajrechcli");
+win=lookup_widget(objet,"GestionClients");
+input=lookup_widget(objet,"ajChoixIDClient");
+
+output=lookup_widget(objet,"ajBModifSuppCli");
+strcpy(id,gtk_entry_get_text(GTK_ENTRY(input)));
+p=recherche( id,2);
+if(p!=-1){
+
+
+gtk_widget_destroy(win);
+
+win=create_GestionClients();
+treeview=lookup_widget(win,"ajAffichage");
+gtk_widget_show(win);
+
+affichAZ(treeview,p);
+}
+else
+{
+gtk_widget_destroy(win);
+win=create_GestionClients();
+output=lookup_widget(win,"ajBModifSuppCli");
+treeview=lookup_widget(win,"ajAffichage");
+gtk_widget_show(win);
+gtk_label_get_text(GTK_LABEL(output));
+gtk_label_set_text(GTK_LABEL(output),"Identifiant invalide");
+Afficher_user(treeview,2);
+}
+}
+
+
+void
+on_jbButtonobtdevis_clicked            (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget *input,*output;
+input=lookup_widget(objet,"jbID");
+output=lookup_widget(objet,"jbLabelsimple");
+
+Vol a2;
+strcpy(a2.identifiant,gtk_entry_get_text(GTK_ENTRY(input)));
+if (verif_ID_vol(a2)==0)
+{gtk_label_set_text(GTK_LABEL(output),"Identifiant invalide");
+gtk_widget_show(output);}
+else gtk_widget_hide(output);
+}
+
+
+void
+on_jbChercheremplvol_clicked           (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+char date[20];
+char date1[50];Vol a,a1;
+GtkWidget *jbCherchervolemp12,*jbListevolajoutempl,*jbListevolAllretemploye,*jbChercheremplvol,*jbListevolallsimpleemploye,*jbTreeviewmodif15;
+GtkWidget *output,*output1,*output2,*output3,*output4,*input,*input1,*Comboboxclasse,*input2,*input3,*jbTreeviewall13,*jbTreeviewallret13,*jbTreeviewallsimpl15;
+int jbtest;
+FILE* f=fopen("verif_all_ret_temp.txt","r");
+fscanf(f,"%d",&jbtest);
+fclose(f);
+FILE*g=fopen("verif_all_ret_temp.txt","w");
+    fprintf(g,"%d\n",1);
+    fclose(g);
+/*aller simple*/
+if (jbtest==2)
+{int  y,m,d;
+output3=lookup_widget(objet,"jbLabelAllempl14") ;
+input=lookup_widget(objet,"jbCalendarallemp");
+Comboboxclasse=lookup_widget(objet,"jbComboboxempl1");
+jbCherchervolemp12=lookup_widget(objet,"jbCherchervolemp12");
+jbListevolallsimpleemploye=lookup_widget(objet,"jbListevolallsimpleemploye");
+gtk_calendar_get_date((GtkCalendar *)input,&y,&m,&d);
+a.date.jours=d;
+a.date.mois=m+1;
+a.date.annee=y;
+if (strcmp("classe economique",gtk_combo_box_get_active_text(GTK_COMBO_BOX(Comboboxclasse)))==0)
+a.classe=1;
+else
+a.classe=2;
+input1=lookup_widget(objet,"jbEntryorigineempl");
+input2=lookup_widget(objet,"jbEntrydestinationempl");
+input3=lookup_widget(objet,"jbNbredeplaceempl");
+strcpy(a.origine,gtk_entry_get_text(GTK_ENTRY(input1)));
+strcpy(a.destination,gtk_entry_get_text(GTK_ENTRY(input2)));
+char ch[20];int nbr1;
+strcpy(ch,gtk_entry_get_text(GTK_ENTRY(input3)));
+sscanf(ch,"%d",&(a.nbre_de_places));
+sscanf(ch,"%d",&(nbr1));
+Vol x[500];Vol tab1[500]; int m1=0; int x1;
+x1=remplir_tab_avec_la_liste_des_vols(x);
+verif_vol_dispo(x,a,tab1,x1,&m1,nbr1);
+ajouter_tab_all_ds_fichier(tab1,m1);
+if (m1==0)
+{gtk_label_set_text(GTK_LABEL(output3),"pas de vol disponible");
+gtk_widget_show(output3);
+FILE*o=fopen("verif_all_ret_temp.txt","w");
+    fprintf(o,"%d\n",2);
+    fclose(o);
+gtk_calendar_get_date((GtkCalendar *)input,&y,&m,&d);
+a.date.jours=d;
+a.date.mois=m+1;
+a.date.annee=y;
+if (strcmp("classe economique",gtk_combo_box_get_active_text(GTK_COMBO_BOX(Comboboxclasse)))==0)
+a.classe=1;
+else
+a.classe=2;
+strcpy(a.origine,gtk_entry_get_text(GTK_ENTRY(input1)));
+strcpy(a.destination,gtk_entry_get_text(GTK_ENTRY(input2)));
+char ch[20];
+strcpy(ch,gtk_entry_get_text(GTK_ENTRY(input3)));
+sscanf(ch,"%d",&(a.nbre_de_places));
+sscanf(ch,"%d",&(nbr1));
+Vol x[500];Vol tab1[500]; int m1=0; int x1;
+x1=remplir_tab_avec_la_liste_des_vols(x);
+verif_vol_dispo(x,a,tab1,x1,&m1,nbr1);
+}
+else{
+gtk_widget_hide(output3);
+ajouter_tab_all_ds_fichier(tab1,m1);
+
+gtk_widget_destroy(jbCherchervolemp12);
+jbListevolallsimpleemploye=create_jbListevolallsimpleemploye();
+gtk_widget_show(jbListevolallsimpleemploye);
+jbTreeviewallsimpl15=lookup_widget(jbListevolallsimpleemploye,"jbTreeviewallsimpl15");
+afficher_tous_les_vol1(jbTreeviewallsimpl15,tab1,m1);
+}}
+/*alller retour */
+else
+{output4= lookup_widget(objet, "jbLabelemplallret14") ;
+input1=lookup_widget(objet,"jbEntryorigineempl");
+input2=lookup_widget(objet,"jbEntrydestinationempl");
+input3=lookup_widget(objet,"jbNbredeplaceempl");
+
+strcpy(a.origine,gtk_entry_get_text(GTK_ENTRY(input1)));
+strcpy(a.destination,gtk_entry_get_text(GTK_ENTRY(input2)));
+strcpy(a1.origine,a.destination);
+strcpy(a1.destination,a.origine);
+/* a1.classe=a.classe; */
+char ch[20];Vol x[500];int x1;
+strcpy(ch,gtk_entry_get_text(GTK_ENTRY(input3)));
+if ((strcmp(a.origine,"")==0) || (strcmp(a.destination,"")==0) || (strcmp(ch,"")==0))
+{x1=remplir_tab_avec_la_liste_des_vols(x);
+jbCherchervolemp12=lookup_widget(objet,"jbCherchervolemp12");
+gtk_widget_destroy(jbCherchervolemp12);
+jbListevolajoutempl=lookup_widget(objet,"jbListevolajoutempl");
+jbListevolajoutempl=create_jbListevolajoutempl();
+gtk_widget_show(jbListevolajoutempl);
+jbTreeviewmodif15=lookup_widget(jbListevolajoutempl,"jbTreeviewmodif15");
+afficher_tous_les_vol1(jbTreeviewmodif15,x,x1);}
+else
+{input=lookup_widget(objet,"jbCalendarallemp");
+int y,d,m;int m3,y1,d1;int nbr1;
+gtk_calendar_get_date((GtkCalendar *)input,&y,&m,&d);
+a.date.jours=d;
+a.date.mois=m+1;
+a.date.annee=y;
+Comboboxclasse=lookup_widget(objet,"jbComboboxempl1");
+jbChercheremplvol=lookup_widget(objet,"jbChercheremplvol");
+output=lookup_widget(objet,"jbLabelcalendrierall");
+sprintf(date,"%d/%d/%d\0",d,m+1,y);
+gtk_label_set_text (output,date);
+input1=lookup_widget(objet,"jbCalendarretemp");
+gtk_calendar_get_date ((GtkCalendar *)input1,&y1,&m3,&d1);
+a1.date.jours=d1;
+a1.date.mois=m3+1;
+a1.date.annee=y1;
+output1=lookup_widget(objet,"jbCalendrierret12");
+sprintf(date1,"%d/%d/%d\0",d1,m3+1,y1);
+gtk_label_set_text (output1,date1);
+if (strcmp("classe economique",gtk_combo_box_get_active_text(GTK_COMBO_BOX(Comboboxclasse)))==0)
+{a.classe=1;a1.classe=1;}
+else
+{a.classe=2;a1.classe=2;}
+a1.classe=a.classe;
+sscanf(ch,"%d",&(a.nbre_de_places));
+sscanf(ch,"%d",&(nbr1));
+Vol x[500];Vol tab1[500]; int m1=0; int x1;Vol tab2[500]; int m2=0;
+x1=remplir_tab_avec_la_liste_des_vols(x);
+verif_vol_dispo(x,a,tab1,x1,&m1,nbr1);
+verif_vol_dispo(x,a1,tab2,x1,&m2,nbr1);
+if ((m1==0) || (m2==0))
+{gtk_label_set_text(GTK_LABEL(output4),"pas de vol disponible");
+gtk_widget_show(output4);}
+else{
+gtk_widget_hide(output4);
+ajouter_tab_all_ds_fichier(tab1,m1);
+ajouter_tab_ret_ds_fichier(tab2,m2);
+jbCherchervolemp12=lookup_widget(objet,"jbCherchervolemp12");
+gtk_widget_destroy(jbCherchervolemp12);
+jbListevolAllretemploye=lookup_widget(objet,"jbListevolAllretemploye");
+jbListevolAllretemploye=create_jbListevolAllretemploye();
+gtk_widget_show(jbListevolAllretemploye);
+jbTreeviewall13=lookup_widget(jbListevolAllretemploye,"jbTreeviewall13");
+afficher_tous_les_vol1(jbTreeviewall13,tab1,m1);
+jbTreeviewallret13=lookup_widget(jbListevolAllretemploye,"jbTreeviewallret13");
+afficher_tous_les_vol1(jbTreeviewallret13,tab2,m2);}
+}
+}
+}
+
+
+void
+on_ajGestionService_clicked            (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget *window1,*window2;
+
+window1 = lookup_widget(objet, "ajEspaceAd") ;
+window2 = lookup_widget(objet, "GestionDesServices") ;
+window2=create_GestionDesServices();
+gtk_widget_show(window2);
+}
+
+
+void
+on_LocationDeVoitureclient_clicked     (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget *window1,*window2;
+
+window1 = lookup_widget(objet, "Catalogue") ;
+window2 = lookup_widget(objet, "mcRechercheVC") ;
+window2=create_mcRechercheVC();
+gtk_widget_show(window2);
+}
+
+
+
+
+void
+on_AllerALocationDeVoitureAdmin_clicked
+                                        (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget *window1,*window2,*treeview;
+voiture t[200];
+int n=lecture(t);
+
+window1 = lookup_widget(objet, "GestionDesServices") ;
+window2 = lookup_widget(objet, "mcAjoutModificationSupressionVoiture") ;
+treeview=lookup_widget(objet,"mcListeAjoutModificationSuppressionVoitureTreeview");
+
+gtk_widget_destroy(window1);
+window2=create_mcAjoutModificationSupressionVoiture();
+gtk_widget_show(window2);
+treeview=lookup_widget(window2,"mcListeAjoutModificationSuppressionVoitureTreeview");
+Affichervoiture(treeview,t,n);
+}
+
+
+void
+on_mcBoutonRechercherVoitureClient_clicked
+                                        (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget *prix, *places, *calendar1, *calendar2, *clim,*window2,*treeview, *output, *fixed1;
+char ch1[50],ch2[50],ch9[5];
+int pr,pl,jan,man,aan,jrn,mrn,arn,x;
+voiture tabrecherche[200];
+prix=lookup_widget(objet,"mcRechercheVoitureClient");
+clim=lookup_widget(objet,"mcClimatiseurRechercheVoitureClient");
+places=lookup_widget(objet,"mcspinbuttonplacesclient");
+calendar1=lookup_widget(objet,"mccalendar1");
+calendar2=lookup_widget(objet,"mccalendar2");
+window2=lookup_widget(objet,"mcListeDesVoituresClient");
+treeview=lookup_widget(objet,"mcListeVoitureClientTreeview");
+output=lookup_widget(objet,"label267");
+fixed1=lookup_widget(objet,"fixed38");
+strcpy(ch1,gtk_entry_get_text(GTK_ENTRY(prix)));
+sscanf(ch1,"%d",&pr);
+pl=(gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(places)));
+
+gtk_calendar_get_date ((GtkCalendar *)calendar1,&jan,&man,&aan);
+gtk_calendar_get_date ((GtkCalendar *)calendar2,&jrn,&mrn,&arn);
+strcpy(ch9,gtk_combo_box_get_active_text(GTK_COMBO_BOX(clim)));
+
+FILE* f=fopen("etat.txt","r");
+int a;
+fscanf(f,"%d",&a);
+x=recherche_vouiture(jan,man,aan,jrn,mrn,arn,pr,ch9,pl,tabrecherche);
+if ((arn<aan)||((arn==aan)&&(mrn<man))||((arn==aan)&&(mrn==man)&&(jrn<jan)))
+gtk_label_set_text(GTK_LABEL(output),"veuillez s.v.p verifier la date");
+else if (x!=0)
+{window2=create_mcListeDesVoituresClient();
+gtk_widget_show(window2);
+treeview=lookup_widget(window2,"mcListeVoitureClientTreeview");
+Affichervoiture(treeview,tabrecherche,x);
+if(a==1){
+fixed1=lookup_widget(window2,"fixed38");
+gtk_widget_show(fixed1);}
+
+}
+else if (x==0) {gtk_label_set_text(GTK_LABEL(output),"Pas de voiture à ce moment");}
+fclose(f);
+}
+
+
+void
+on_mcModifierVoiture_clicked           (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget *id, *window1, *window2, *output, *input;
+char ch[50];
+window1=lookup_widget(objet,"mcAjoutModificationSupressionVoiture");
+window2=lookup_widget(objet,"mcModificationVoiture");
+id=lookup_widget(objet,"mcIDVoitureRechercheEntry");
+output=lookup_widget(objet,"mcoutputajoutmodifsuppvoiture");
+input=lookup_widget(objet,"mcIDVoitureModifier");
+strcpy(ch,gtk_entry_get_text(GTK_ENTRY(id)));
+int x=verif_id(ch);
+if (x==1){
+gtk_widget_destroy(window1);
+window2=create_mcModificationVoiture();
+gtk_widget_show(window2);
+input=lookup_widget(window2,"mcIDVoitureModifier");
+gtk_label_set_text(GTK_LABEL(input),ch);}
+else gtk_label_set_text(GTK_LABEL(output),"identifiant invalide");
+}
+
+
+void
+on_mcEnregistrervoitureModification_clicked
+                                        (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget *prix, *marque, *modele, *clim, *places, *id,*output;
+char ch[50],ch1[50];
+voiture v;
+prix=lookup_widget(objet,"mcPrixVoitureModifier");
+marque=lookup_widget(objet,"mcMarqueVoitureModifier");
+modele=lookup_widget(objet,"mcModeleVoitureModifier");
+clim=lookup_widget(objet,"mcClimatieurModifier");
+places=lookup_widget(objet,"mcNbrPlacesModifier");
+id=lookup_widget(objet,"mcIDVoitureModifier");
+output=lookup_widget(objet,"mcOutputModificationVoiture");
+strcpy(ch,gtk_entry_get_text(GTK_ENTRY(prix)));
+sscanf(ch,"%d",& v.prix_par_jour);
+strcpy(v.marque,gtk_entry_get_text(GTK_ENTRY(marque)));
+strcpy(v.modele,gtk_entry_get_text(GTK_ENTRY(modele)));
+strcpy(v.climatiseur,gtk_combo_box_get_active_text(GTK_COMBO_BOX(clim)));
+strcpy(ch1,gtk_combo_box_get_active_text(GTK_COMBO_BOX(places)));
+sscanf(ch1,"%d",&v.nbr_places);
+strcpy(v.id,gtk_label_get_text(GTK_LABEL(id)));
+printf("%d %d %s %s %s %s",v.prix_par_jour,v.nbr_places,v.marque,v.modele,v.climatiseur,v.id);
+int x=modifvoiture(v);
+if (x==1) gtk_label_set_text(GTK_LABEL(output),"modification faite avec succés");
+else gtk_label_set_text(GTK_LABEL(output),"erreur");
+}
+
+
+void
+on_mcPrecedent_clicked                 (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget *window1,*window2;
+
+window1 = lookup_widget(objet, "mcAjoutModificationSupressionVoiture") ;
+window2 = lookup_widget(objet, "GestionDesServices") ;
+gtk_widget_destroy(window1);
+window2=create_GestionDesServices();
+gtk_widget_show(window2);
+}
+
+
+
+void
+on_mcPrecedentajoutvoiture_clicked     (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget *window1,*window2,*treeview;
+voiture t[200];
+int n=lecture(t);
+window1 = lookup_widget(objet, "mcAjouterVoiture") ;
+window2 = lookup_widget(objet, "mcAjoutModificationSupressionVoiture") ;
+treeview=lookup_widget(objet,"mcListeAjoutModificationSuppressionVoitureTreeview");
+gtk_widget_destroy(window1);
+window2=create_mcAjoutModificationSupressionVoiture();
+gtk_widget_show(window2);
+treeview=lookup_widget(window2,"mcListeAjoutModificationSuppressionVoitureTreeview");
+Affichervoiture(treeview,t,n);
+}
+
+
+void
+on_mcPrecedentModification_clicked     (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget *window1,*window2,*treeview;
+voiture t[200];
+int n=lecture(t);
+window1 = lookup_widget(objet, "mcModificationVoiture") ;
+window2 = lookup_widget(objet, "mcAjoutModificationSupressionVoiture") ;
+treeview=lookup_widget(objet,"mcListeAjoutModificationSuppressionVoitureTreeview");
+gtk_widget_destroy(window1);
+window2=create_mcAjoutModificationSupressionVoiture();
+gtk_widget_show(window2);
+treeview=lookup_widget(window2,"mcListeAjoutModificationSuppressionVoitureTreeview");
+Affichervoiture(treeview,t,n);
+}
+
+
+void
+on_BoutonPredecentGestionDeServices_clicked
+                                        (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget *window1,*window2;
+
+window1 = lookup_widget(objet, "GestionDesServices") ;
+window2 = lookup_widget(objet, "ajEspaceAd") ;
+gtk_widget_destroy(window1);
+window2=create_ajEspaceAd();
+gtk_widget_show(window2);
+}
+
+
+void
+on_ajRechEmployyy_clicked              (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget *input,*treeview,*output,*win;
+int p;
+char id[20];
+
+win=lookup_widget(objet,"GestionEmp");
+input=lookup_widget(objet,"ajTSMEmp");
+
+output=lookup_widget(objet,"ajErrTSMEMP");
+strcpy(id,gtk_entry_get_text(GTK_ENTRY(input)));
+p=recherche( id,1);
+if(p!=-1){
+
+
+gtk_widget_destroy(win);
+
+win=create_GestionEmp();
+treeview=lookup_widget(win,"ajAffichageEmp");
+gtk_widget_show(win);
+
+affichAZ(treeview,p);
+}
+else
+{
+gtk_widget_destroy(win);
+win=create_GestionEmp();
+output=lookup_widget(win,"ajErrTSMEMP");
+treeview=lookup_widget(win,"ajAffichageEmp");
+gtk_widget_show(win);
+gtk_label_get_text(GTK_LABEL(output));
+gtk_label_set_text(GTK_LABEL(output),"Identifiant invalide");
+Afficher_user(treeview,1);
+}
+}
+
+
+void
+on_ajannulationajcli_clicked           (GtkWidget       *objet,
+                                        gpointer         user_data)
+{GtkWidget* win,*win2,*win1,*treeview;
+win=lookup_widget(objet,"GestionClients");
+win1=lookup_widget(objet,"Ajout_client");
+win2=lookup_widget(objet,"Modifier_Client");
+gtk_widget_destroy(win1);
+gtk_widget_destroy(win2);
+win=create_GestionClients();
+treeview=lookup_widget(win,"ajAffichage");
+Afficher_user(treeview,2);
+gtk_widget_show(win);
+}
+
+
+void
+on_ajAnnulermodifAge_clicked           (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget* win,*win1,*win2,*treeview;
+win=lookup_widget(objet,"Modifier_Employe");
+win1=lookup_widget(objet,"GestionEmp");
+
+gtk_widget_destroy(win);
+
+win1=create_GestionEmp();
+treeview=lookup_widget(win1,"ajAffichageEmp");
+gtk_widget_destroy(win);
+Afficher_user(treeview,1);
+gtk_widget_show(win1);
+}
+
+
+
+
+
+
+
+
+
+
+
+void
+on_jbButtongeneredevempl18_clicked     (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget *input,*input1,*output,*output1,*output2,*input2;
+input=lookup_widget(objet,"jbEntryemplcol45");
+input1=lookup_widget(objet,"jbIDvol13");
+output=lookup_widget(objet,"jbLabelidvolempl16");
+output1=lookup_widget(objet,"jbLabelidvolempl17");
+output2=lookup_widget(objet,"jbLabelidclientempl17");
+input2=lookup_widget(objet,"jbID13");
+gtk_widget_hide(output);
+gtk_widget_hide(output1);
+gtk_widget_hide(output2);
+Vol a2;Vol a3;char id[20];
+strcpy(a2.identifiant,gtk_entry_get_text(GTK_ENTRY(input)));
+strcpy(a3.identifiant,gtk_entry_get_text(GTK_ENTRY(input1)));
+ strcpy(id,gtk_entry_get_text(GTK_ENTRY(input2)));
+if (verif_ID_vol(a2)==0)
+{gtk_label_set_text(GTK_LABEL(output),"Identifiant invalide");
+gtk_widget_show(output);}
+else gtk_widget_hide(output);
+if (verif_ID_vol1(a3)==0)
+{gtk_label_set_text(GTK_LABEL(output1),"Identifiant invalide");
+gtk_widget_show(output1);}
+else gtk_widget_hide(output1);
+/*
+if (verif_ID_client(a4)==0)
+{gtk_label_set_text(GTK_LABEL(output2),"Identifiant invalide");
+gtk_widget_show(output2);}
+else if (verif_ID_client(a4)==1) gtk_widget_hide(output2); */
+
+
+ if (recherche(id,2)==-1)
+{gtk_label_set_text(GTK_LABEL(output2),"Identifiant invalide");
+gtk_widget_show(output2);}
+else gtk_widget_hide(output2);
+}
+
+
+void
+on_jbObtdevempl12_clicked              (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget *input,*output,*output2,*input1;
+input=lookup_widget(objet,"jbEntryIDvol18");
+output=lookup_widget(objet,"jbIDidentifvolempl");
+output2=lookup_widget(objet,"jbIdetifclient12");
+input1=lookup_widget(objet,"jbIDclient15");
+gtk_widget_hide(output);
+
+Vol a2;char id[20];
+strcpy(a2.identifiant,gtk_entry_get_text(GTK_ENTRY(input)));
+strcpy(id,gtk_entry_get_text(GTK_ENTRY(input1)));
+if (verif_ID_vol(a2)==0)
+{gtk_label_set_text(GTK_LABEL(output),"Identifiant invalide");
+gtk_widget_show(output);}
+else gtk_widget_hide(output);
+if (recherche(id,2)==-1)
+{gtk_label_set_text(GTK_LABEL(output2),"Identifiant invalide");
+}
+else gtk_widget_hide(output2);
+}
+
+
+void
+on_jbRadiobuttonemploiallret_clicked   (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget *input,*output3;int x;
+input=lookup_widget(objet,"jbFixedallretempl12");
+output3=lookup_widget(objet,"jbLabelAllempl14");
+gtk_widget_hide(output3);
+gtk_widget_show(input);
+x=1;
+verif_all_ret(x);
+}
+
+
+void
+on_jbRadiobuttonemploiall_clicked      (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget *input,*output3;int x;
+input=lookup_widget(objet,"jbFixedallretempl12");
+output3=lookup_widget(objet,"jbLabelemplallret14");
+gtk_widget_hide(output3);
+gtk_widget_hide(input);
+x=2;
+verif_all_ret(x);
+}
+
+/*
+void
+on_jbButtonret80_clicked               (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget *jbCherchervolemp12,*jbListevolAllretemploye;
+jbCherchervolemp12=lookup_widget(objet,"jbCherchervolemp12");
+jbListevolAllretemploye=lookup_widget(objet,"jbListevolAllretemploye");
+gtk_widget_destroy(jbListevolAllretemploye);
+jbCherchervolemp12=create_jbCherchervolemp12();
+gtk_widget_show(jbCherchervolemp12);
+}
+
+
+void
+on_jbButtonret81_clicked               (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget *jbCherchervolemp12,*jbListevolallsimpleemploye;
+jbCherchervolemp12=lookup_widget(objet,"jbCherchervolemp12");
+jbListevolallsimpleemploye=lookup_widget(objet,"jbListevolallsimpleemploye");
+gtk_widget_destroy(jbListevolallsimpleemploye);
+jbCherchervolemp12=create_jbCherchervolemp12();
+gtk_widget_show(jbCherchervolemp12);
+}
+
+
+void
+on_jbAjoutemplretour_clicked           (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget *jbCherchervolemp12,*jbListevolajoutempl;
+jbCherchervolemp12=lookup_widget(objet,"jbCherchervolemp12");
+jbListevolajoutempl=lookup_widget(objet,"jbListevolajoutempl");
+gtk_widget_destroy(jbListevolajoutempl);
+jbCherchervolemp12=create_jbCherchervolemp12();
+gtk_widget_show(jbCherchervolemp12);
+}
+
+
+void
+on_jbButtonret86_clicked               (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget *jbCherchervol,*jbListevolallsimpleclient;
+jbCherchervol=lookup_widget(objet,"jbCherchervol");
+jbListevolallsimpleclient=lookup_widget(objet,"jbListevolallsimpleclient");
+gtk_widget_destroy(jbListevolallsimpleclient);
+jbCherchervol=create_jbCherchervol();
+gtk_widget_show(jbCherchervol);
+}
+
+
+void
+on_jbButtonretour90_clicked            (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget *jbCherchervol,*jbListevolallretclient12;
+jbCherchervol=lookup_widget(objet,"jbCherchervol");
+jbListevolallretclient12=lookup_widget(objet,"jbListevolallretclient12");
+gtk_widget_destroy(jbListevolallretclient12);
+jbCherchervol=create_jbCherchervol();
+gtk_widget_show(jbCherchervol);
+} */
+
+
+//FEDIIIIIIIIIIIIIIIIIIIIIIIIIII
+
+void
+on_fgDevis_clicked                     (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget *windEspace,*windAfficher,*treeview;
+
+windEspace=lookup_widget(objet,"EspaceCli");
+gtk_widget_destroy(windEspace);
+windAfficher=lookup_widget(objet,"fgDevisWindow");
+
+
+windAfficher=create_fgDevisWindow();
+gtk_widget_show(windAfficher);
+treeview=lookup_widget(windAfficher,"fgDevisTreeView");
+
+Afficher_Devis(treeview);
+}
+
+
+void
+on_fgFacture_clicked                   (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget *windEspace,*windAfficher,*treeview;
+windEspace=lookup_widget(objet,"EspaceCli");
+gtk_widget_destroy(windEspace);
+windAfficher=lookup_widget(objet,"fgFactureWindow");
+
+windAfficher=create_fgFactureWindow();
+gtk_widget_show(windAfficher);
+treeview=lookup_widget(windAfficher,"fgFactureTreeView");
+Afficher_Facture(treeview);
+}
+
+
+void
+on_fgRetourVersEspace_clicked          (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget *windEspace,*windDevis,*windFacture;
+windEspace=lookup_widget(objet,"EspaceCli");
+windDevis=lookup_widget(objet,"fgDevisWindow");
+windFacture=lookup_widget(objet,"fgFactureWindow");
+gtk_widget_destroy(windDevis);
+gtk_widget_destroy(windFacture);
+windEspace=create_EspaceCli();
+gtk_widget_show(windEspace);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+void
+on_fgButtonRechercheDevis1_clicked     (GtkWidget       *objet,
+                                        gpointer         user_data)
+
+{GtkWidget *win,*input1,*input2,*output,*treeview,*treeview1,*win1,*input3,*input4,*input5,*input6,*input7,*input8,*input9,*input10,*windAfficher,*windEspace;
+char ch2[20],id[20];
+user u[200];
+int n,i,x;
+int rech;
+n=getDevis(u);
+devis tabrecherche[200];
+input1 = lookup_widget(objet, "fgComboBoxRech") ;
+
+input2= lookup_widget(objet, "fgEntryRecherche") ;
+output= lookup_widget(objet, "fgLabelRechDevis") ;
+win=lookup_widget(objet, "fgWindowRechercheD") ;
+treeview=lookup_widget( objet,"fgScrolledTreeViewRechercheDevis") ;
+treeview1=lookup_widget( objet,"fgTreeViewRecherche") ;
+strcpy(ch2,gtk_combo_box_get_active_text(GTK_COMBO_BOX(input1)));
+strcpy(id,gtk_entry_get_text(GTK_ENTRY(input2)));
+
+rech=rechercheDevis(ch2,id);
+x=recherche_Devis(ch2,id,tabrecherche);
+//gtk_widget_hide(treeview1);
+
+if(x==-1)
+{gtk_label_set_text(GTK_LABEL(output),"Recherche invalide");
+gtk_widget_show(output);
+
+}
+else
+{
+//x=recherche_Devis(ch2,id,tabrecherche);
+
+
+windEspace=lookup_widget(objet,"fgWindowRechercheD");
+gtk_widget_destroy(windEspace);
+windAfficher=lookup_widget(objet,"fgWindowRechercheD");
+windAfficher=create_fgWindowRechercheD();
+gtk_widget_show(windAfficher);
+treeview1=lookup_widget( windAfficher,"fgTreeViewRecherche") ;
+AfficherDevis(treeview1,tabrecherche,x);
+
+}
+}
+
+
+
+
+void
+on_fgButtonRechercheFacture1_clicked   (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+
+}
+
+
+void
+on_fgButtonRechercheDevis_clicked      (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget *windDevis,*windRecherche,*treeview,*treeview1;
+treeview=lookup_widget( objet,"fgScrolledTreeViewRechercheDevis") ;
+treeview1=lookup_widget( objet,"fgTreeViewRecherche") ;
+gtk_widget_hide(treeview);
+gtk_widget_hide(treeview1);
+windDevis=lookup_widget(objet, "fgDevisWindow") ;
+windRecherche=lookup_widget(objet, "fgWindowRechercheD") ;
+gtk_widget_destroy(windDevis);
+windRecherche=create_fgWindowRechercheD();
+gtk_widget_show(windRecherche);
+
+}
+
+
+void
+on_fgRetourVersDevis_clicked           (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget *windDevis,*windRecherche,*treeview;
+
+windDevis=lookup_widget(objet, "fgDevisWindow") ;
+windRecherche=lookup_widget(objet, "fgWindowRechercheD") ;
+
+gtk_widget_destroy(windRecherche);
+windDevis=create_fgDevisWindow();
+gtk_widget_show(windDevis);
+treeview=lookup_widget(windDevis,"fgDevisTreeView");
+Afficher_Devis(treeview);
+}
+
+void
+on_fgRetourVersFacture_clicked         (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget *windFacture,*windRecherche,*treeview;
+
+windFacture=lookup_widget(objet, "fgFactureWindow") ;
+windRecherche=lookup_widget(objet, "fgWindowRechercheF") ;
+
+gtk_widget_destroy(windRecherche);
+windFacture=create_fgFactureWindow();
+gtk_widget_show(windFacture);
+treeview=lookup_widget(windFacture,"fgFactureTreeView");
+Afficher_Facture(treeview);
+
+}
+
+void
+on_fgButtonRechercheFacture_clicked    (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget *windFacture,*windRecherche;
+
+windFacture=lookup_widget(objet, "fgFactureWindow") ;
+windRecherche=lookup_widget(objet, "fgWindowRechercheF") ;
+gtk_widget_destroy(windFacture);
+windRecherche=create_fgWindowRechercheF();
+gtk_widget_show(windRecherche);
+}
+
+//FIN FEDIIIIIIIIIIIIIIIIIIi
+
+
+
+
+void
+on_fgDevisTreeView_row_activated       (GtkTreeView     *treeview,
+                                        GtkTreePath     *path,
+                                        GtkTreeViewColumn *column,
+                                        gpointer         user_data)
+{
+   //gint int_data;
+   //gchar *str_data1,*str_data12,*str_data13,*str_data14,*str_data15,*str_data16,*str_data17,*str_data18;
+	FILE *f;
+	f=fopen("test.txt","w");
+   GtkTreeIter iter;
+   GtkTreeModel *model = gtk_tree_view_get_model(treeview);
+
+   if (gtk_tree_model_get_iter(model, &iter, path)) {
+      gtk_tree_model_get (GTK_LIST_STORE(model), &iter, 0, &str_data1,1, &str_data12, 2, &str_data13,3, &str_data14,4, &str_data15,5, &str_data16,6, &str_data17,7, &str_data18, -1);
+
+	fprintf(f,"%s %s %s %s %s %s %s %s\n",str_data1,str_data12,str_data13,str_data14,str_data15,str_data16,str_data17,str_data18);
+	fclose(f);
+   }
+
+}
+
+
+void
+on_fgButtonSuppDevis_clicked           (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget *input,*output1,*treeview,*win1;
+
+input= lookup_widget(objet, "fgEntryDevis1") ;
+output1= lookup_widget(objet, "fgDevisOutput") ;
+
+gtk_label_set_text(GTK_LABEL(output1),"suppression reussite");
+suppressionDevis(str_data12);
+win1 = lookup_widget(objet, "fgDevisWindow") ;
+gtk_widget_destroy(win1);
+
+win1=create_fgDevisWindow();
+gtk_widget_show(win1);
+treeview=lookup_widget(win1,"fgDevisTreeView");
+Afficher_Devis(treeview);
+
+}
+/*void
+on_fgButtonSuppDevis_clicked           (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget *input,*output1,*treeview,*win1;
+char id[20];
+input= lookup_widget(objet, "fgEntryDevis1") ;
+output1= lookup_widget(objet, "fgDevisOutput") ;
+strcpy(id,gtk_entry_get_text(GTK_ENTRY(input)));
+if(rechercheDevis("idDevis",id)==-1)
+gtk_label_set_text(GTK_LABEL(output1),"identifiant invalide!!");
+else{
+gtk_label_set_text(GTK_LABEL(output1),"suppression reussite");
+suppressionDevis(id);
+win1 = lookup_widget(objet, "fgDevisWindow") ;
+gtk_widget_destroy(win1);
+
+win1=create_fgDevisWindow();
+gtk_widget_show(win1);
+treeview=lookup_widget(win1,"fgDevisTreeView");
+Afficher_Devis(treeview);
+}
+}
+*/
+
+
+void
+on_ajGestionServiceEmloye_clicked      (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget *window1,*window2;
+
+window1 = lookup_widget(objet, "Espace_Emp") ;
+window2 = lookup_widget(objet, "GestionDesServices") ;
+window2=create_GestionDesServices();
+gtk_widget_show(window2);
+}
+/*
+
+void
+on_jbButtonobtdevis_clicked            (GtkButton       *button,
+                                        gpointer         user_data)
+{
+
+}
+
+
+void
+on_jbButtonobtdevallret_clicked        (GtkButton       *button,
+                                        gpointer         user_data)
+{
+
+}
+
+*/
+
+void
+on_Vol_clicked                         (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget *window1,*window2;
+
+window1 = lookup_widget(objet, "Catalogue") ;
+window2 = lookup_widget(objet, "jbCherchervol") ;
+window2=create_jbCherchervol();
+gtk_widget_show(window2);
+}
+
+//belhaa
+void
+on_bhbutton3_clicked                     (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget *principal, *Reclamation_client;
+
+gtk_widget_destroy(Reclamation_client);
+principal=create_principal1();
+gtk_widget_show(principal);
+}
+void
+on_bhcreation_clicked                     (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget *Reclamation_client;
+GtkWidget *Creer;
+
+Reclamation_client=lookup_widget(objet,"Reclamation_client");
+
+gtk_widget_destroy(Reclamation_client);
+Creer=create_Creer();
+
+gtk_widget_show(Creer);
+}
+void
+on_bhbutton2_clicked                     (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget *Reclamation_client;
+GtkWidget *consulter;
+GtkWidget *treeview1;
+
+Reclamation_client=lookup_widget(objet,"Reclamation_client");
+
+gtk_widget_destroy(Reclamation_client);
+consulter=lookup_widget(objet,"consulter");
+consulter=create_consulter();
+
+gtk_widget_show(consulter);
+treeview1=lookup_widget(consulter,"bhtreeview1");
+afficher_reclamation(treeview1);
+}
+void
+on_bhbutton4_clicked                     (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget *Reclamation_client, *Creer;
+Creer=lookup_widget(objet,"Creer");
+gtk_widget_destroy(Creer);
+Reclamation_client=create_Reclamation_client();
+gtk_widget_show(Reclamation_client);
+}
+void
+on_bhbutton5_clicked                     (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget *combobox1;
+GtkWidget *input;
+GtkWidget *Creer;
+GtkWidget *output;
+reclamation c ; 
+char type[100];
+char rec[100];
+int jour,mois,annee;
+char id[100];
+
+combobox1=lookup_widget(objet,"combobox1");
+strcpy(c.type,gtk_combo_box_get_active_text(GTK_COMBO_BOX(combobox1)));
+
+input=lookup_widget(objet,"bhentry3");
+strcpy(c.id,gtk_entry_get_text(GTK_ENTRY(input)));
+
+input=lookup_widget(objet,"bhspinbutton1");
+c.jour=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(input));
+input=lookup_widget(objet,"bhspinbutton2");
+c.mois=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(input));
+input=lookup_widget(objet,"bhspinbutton3");
+c.annee=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(input));
+
+input=lookup_widget(objet,"entry2");
+strcpy(c.rec,gtk_entry_get_text(GTK_ENTRY(input)));
+ajouter_reclamation(c);
+output=lookup_widget(objet,"label15");
+gtk_label_set_text(GTK_LABEL(output),"Votre reclamation a été envoyée");
+}
+void
+on_bhbutton6_clicked                     (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget *Creer, *succe;
+succe=lookup_widget(objet,"succe");
+gtk_widget_destroy(succe);
+Creer=create_Creer();
+gtk_widget_show(Creer);
+}
+
+
+void
+on_bhbutton9_clicked                     (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+reclamation c ;
+	GtkWidget *input5 ;
+	GtkWidget *window1 ;
+	GtkWidget *output3;
+ 	GtkWidget *treeview;
+        GtkWidget *employe;
+    char id[50];
+ employe=lookup_widget(objet,"employe");
+  input5=lookup_widget(objet,"bhentry5");
+
+strcpy(id,gtk_entry_get_text(GTK_ENTRY(input5)));
+supprimer_reclamation(id);
+
+
+employe=lookup_widget(objet,"employe");
+gtk_widget_destroy(employe);
+employe=lookup_widget(objet,"employe");
+employe=create_employe();
+output3=lookup_widget(employe,"bhlabel23");
+gtk_label_set_text(GTK_LABEL(output3),"La reclamation a été supprimée");
+gtk_widget_show(employe);
+treeview=lookup_widget(employe,"bhtreeview2");
+afficher_reclamation(treeview);
+}
+
+void
+on_bhbutton18_clicked                     (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget *window;
+window=lookup_widget(objet,"consulter");
+gtk_widget_hide(window);
+window=create_modifier();
+gtk_widget_show(window);
+
+}
+
+void
+on_bhbutton7_clicked                     (GtkWidget       *objet,
+                                        gpointer         user_data)
+
+{
+GtkWidget *Reclamation_client, *consulter;
+
+
+consulter=lookup_widget(objet,"consulter");
+gtk_widget_destroy(consulter);
+Reclamation_client=create_Reclamation_client();
+gtk_widget_show(Reclamation_client);
+}
+
+
+void
+on_bhbutton10_clicked                    (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget *principal1, *employe;
+
+employe=lookup_widget(objet,"employe");
+gtk_widget_destroy(employe);
+/*principal1=create_principal1();
+gtk_widget_show(principal1);*/
+}
+void
+on_bhbutton11_clicked                    (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget *principal1;
+GtkWidget *employe;
+GtkWidget *treeview2;
+
+principal1=lookup_widget(objet,"principal1");
+
+gtk_widget_destroy(principal1);
+employe=lookup_widget(objet,"employe");
+employe=create_employe();
+
+gtk_widget_show(employe);
+
+treeview2=lookup_widget(employe,"bhtreeview2");
+afficher_reclamation(treeview2);
+}
+
+void
+on_bhbutton12_clicked                    (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget *input5,*input4;
+GtkWidget *window1;
+GtkWidget *output1;
+
+char id[100];
+char rep[100];
+window1=lookup_widget(objet,"window1");
+
+input5=lookup_widget(objet,"bhentry5");
+input4=lookup_widget(objet,"bhentry4");
+
+strcpy(id,gtk_entry_get_text(GTK_ENTRY(input5)));
+strcpy(rep,gtk_entry_get_text(GTK_ENTRY(input4)));
+
+ajouter_repense(id,rep);
+output1=lookup_widget(objet,"bhlabel22");
+gtk_label_set_text(GTK_LABEL(output1),"Votre reponse a été envoyée");
+}
+
+
+void
+on_clien_clicked                       (GtkButton       *button,
+                                        gpointer         user_data)
+{
+
+}
+
+
+void
+on_bhbutton15_clicked                    (GtkButton       *button,
+                                        gpointer         user_data)
+{GtkWidget *window;
+window=lookup_widget(button,"modifier");
+gtk_widget_hide(window);
+window=create_Reclamation_client();
+gtk_widget_show(window);
+}
+
+
+void
+on_bhbutton17_clicked                    (GtkButton       *button,
+                                        gpointer         user_data)
+{GtkWidget *input;
+GtkWidget *output;
+char a[20];
+reclamation c;
+input = lookup_widget(button,"bhentry7");
+strcpy(c.id,gtk_entry_get_text(GTK_ENTRY(input)));
+strcpy(a,gtk_entry_get_text(GTK_ENTRY(input)));
+input = lookup_widget(button,"bhcombobox2");
+strcpy(c.type,gtk_combo_box_get_active_text(GTK_COMBO_BOX(input)));
+
+input = lookup_widget(button,"bhspinbutton4");
+c.jour=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(input));
+input = lookup_widget(button,"bhspinbutton5");
+c.mois=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(input));
+input = lookup_widget(button,"bhspinbutton6");
+c.annee=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(input));
+input = lookup_widget(button,"bhentry6");
+strcpy(c.rec,gtk_entry_get_text(GTK_ENTRY(input)));
+
+FILE *f;
+reclamation b;
+f=fopen("reclamation.txt","r+");
+int i;
+i=0;
+while(fscanf(f,"%s %s %d %d %d %s \n",b.id,b.type,&b.jour,&b.mois,&b.annee,b.rec)!=EOF){
+if (strcmp(b.id,c.id)==0)
+	{
+	supprimer_reclamation(a);	
+	ajouter_reclamation(c);
+	i++;
+	}
+}
+if (i==0)
+	{output=lookup_widget(button,"bhlabel29");
+gtk_label_set_text(GTK_LABEL(output),"cet identifiant n'existe pas");
+}
+else 	{output=lookup_widget(button,"bhlabel29");
+gtk_label_set_text(GTK_LABEL(output),"Votre reclamation a été modifiée modifiée");
+}
+}
+
+
+void
+on_bhbutton13_clicked                    (GtkButton       *button,
+                                        gpointer         user_data)
+{
+GtkWidget *window;
+GtkWidget *input;
+GtkWidget *treeview;
+char cherche[20];
+input=lookup_widget(button,"bhentry5");
+strcpy(cherche,gtk_entry_get_text(GTK_ENTRY(input)));
+recherchebh(cherche);
+	window=lookup_widget(button,"employe");
+	gtk_widget_destroy(window);
+	window=create_employe();
+	gtk_widget_show(window);
+	treeview=lookup_widget(window,"bhtreeview2");
+	afficher_recherche(treeview);
+
+
+
+}
+
+
+void
+on_bhbutton19_clicked                    (GtkButton       *button,
+                                        gpointer         user_data)
+{GtkWidget *window;
+GtkWidget *treeview;
+window=lookup_widget(button,"consulter");
+gtk_widget_destroy(window);
+	window=create_reponce();
+	gtk_widget_show(window);
+	treeview=lookup_widget(window,"bhtreeview3");
+	afficher_repense(treeview);
+
+}
+
+
+void
+on_bhbutton20_clicked                    (GtkButton       *button,
+                                        gpointer         user_data)
+{
+GtkWidget *window;
+
+window=lookup_widget(button,"reponce");
+gtk_widget_destroy(window);
+	window=create_Reclamation_client();
+	gtk_widget_show(window);
+}
+
+
+
+
+
+
+void
+on_bhsrec_clicked                      (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget *window;
+
+window=lookup_widget(objet,"Reclamation_client");
+	window=create_Reclamation_client();
+	gtk_widget_show(window);
+}
+
+
+void
+on_ajConsRec_clicked                   (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget *window,*treeview;
+
+window=lookup_widget(objet,"employe");
+	window=create_employe();
+treeview=lookup_widget(window,"bhtreeview2");
+afficher_reclamation(treeview);
+	gtk_widget_show(window);
+}
+
+
+
